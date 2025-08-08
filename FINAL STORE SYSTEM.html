@@ -1,0 +1,3518 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Management System</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* --- General & Premium Look CSS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50e3c2;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --white-color: #ffffff;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --deep-blue: #2c3a6b;
+            --normal-blue: #4a90e2;
+            --text-red: #c0392b;
+            --text-violet: #8e44ad;
+            --text-green: #27ae60;
+            --warning-bg: #fffbe6;
+            --warning-border: #ffe58f;
+            --danger-bg-light: #ffebee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--white-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding-bottom: 60px; /* Space for footer */
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+        
+        .report-section h3 {
+             color: var(--deep-blue);
+             border-bottom: 2px solid var(--primary-color);
+             padding-bottom: 10px;
+             margin-top: 25px;
+        }
+
+        /* --- Tabs --- */
+        .tabs {
+            display: flex;
+            background: var(--dark-color);
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: var(--light-color);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+        }
+
+        .tab-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sub-tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sub-tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: #555;
+            position: relative;
+        }
+        .sub-tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        .sub-tab-button.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .sub-tab-button.active::after {
+            width: 100%;
+        }
+        
+        .sub-tab-content { display: none; }
+        .sub-tab-content.active { display: block; }
+
+
+        /* --- Forms --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:disabled, .form-group select:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+        
+        /* Specific Label Colors */
+        .label-deep-blue { color: var(--deep-blue); font-weight: bold; }
+        .label-normal-blue { color: var(--normal-blue); font-weight: bold; }
+        .label-red { color: var(--text-red); font-weight: bold; }
+        .label-violet { color: var(--text-violet); font-weight: bold; }
+        .label-green { color: var(--text-green); font-weight: bold; }
+
+        .calculated-value {
+            font-weight: bold;
+            color: var(--text-red);
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #357ABD;
+        }
+
+        .btn-secondary {
+            background-color: var(--dark-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #1a2531;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+             background-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-clear {
+            background-color: #bdc3c7;
+        }
+        .btn-clear:hover {
+            background-color: #95a5a6;
+        }
+        
+        .btn-link {
+            background: none;
+            color: var(--primary-color);
+            text-decoration: underline;
+            padding: 0 5px;
+            margin: 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-link.btn-danger {
+            color: var(--danger-color);
+        }
+
+        /* --- Tables/Lists & Rate List --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .data-table th {
+            background-color: var(--dark-color);
+            color: white;
+            font-weight: 600;
+        }
+        .data-table tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        .data-table tr:hover {
+            background-color: #e8f4f8;
+        }
+        .data-table tr.low-stock-warning {
+            background-color: var(--danger-bg-light) !important;
+            font-weight: bold;
+        }
+         .data-table tr.low-stock-warning td:first-child {
+            color: var(--text-red);
+        }
+        
+        .rate-list-item {
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .rate-list-item h4 {
+            color: var(--deep-blue);
+            margin-bottom: 10px;
+        }
+        .rate-vendor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .rate-vendor-row:last-child {
+            border-bottom: none;
+        }
+        
+        /* --- Pagination --- */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination-btn {
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #fff;
+        }
+        .pagination-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Modals (Pop-ups) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slide-down 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slide-down {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-table-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .close-button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Utility & Footer */
+        .mt-20 { margin-top: 20px; }
+        .d-flex { display: flex; align-items: center; }
+        .gap-10 { gap: 10px; }
+        .w-100 { width: 100%; }
+        hr { border: 0; height: 1px; background: #ddd; margin: 30px 0; }
+        .search-box {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 300px;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        .item-details-box {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .modal-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .hidden {
+            display: none;
+        }
+        
+        .app-footer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #777;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Store Management System</h1>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'itemManage')"><b>ITEM MANAGE</b></button>
+        <button class="tab-button" onclick="openTab(event, 'itemRates'); renderLiveRateReport();"><b>RATE OF ITEMS</b></button>
+        <button class="tab-button" onclick="openTab(event, 'purchaseManage')"><b>PURCHASE MANAGE</b></button>
+        <button class="tab-button" onclick="openTab(event, 'issueManage')"><b>ISSUE REQUISITION MANAGE</b></button>
+        <button class="tab-button" onclick="openTab(event, 'report')"><b>REPORT</b></button>
+    </nav>
+
+    <main id="itemManage" class="tab-content active">
+        <div class="sub-tabs">
+            <button class="sub-tab-button active" onclick="openSubTab(event, 'addItem', 'itemManage')">ADD ITEM</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'itemList', 'itemManage')">STORE ITEM LIST</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'lowStockList', 'itemManage'); renderLowStockItems();">LOW STOCK ITEMS</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'miscItemList', 'itemManage'); filterMiscItemsLog();">MISCELLANEOUS ITEMS</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'miscDefaults', 'itemManage'); renderMiscDefaultsForm();">MISC DEFAULTS</button>
+        </div>
+
+        <div id="addItem" class="sub-tab-content active">
+            <h3>Add New Item</h3>
+            <form id="addItemForm" class="form-grid">
+                <div class="form-group">
+                    <label class="label-deep-blue">ITEM NAME</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-normal-blue">ITEM CODE</label>
+                    <input type="text" id="itemCode" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-red">STOCK PAGE NO.</label>
+                    <input type="number" id="stockPageNo" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-violet">PURCH. PAGE NO.</label>
+                    <input type="number" id="purchPageNo" required>
+                    <div class="d-flex gap-10 mt-20">
+                        <input type="checkbox" id="sameAsStockPage">
+                        <label for="sameAsStockPage">Same as Stock Page No.</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>UNIT MEASURE</label>
+                    <select id="unitMeasure">
+                    </select>
+                    <button type="button" class="btn-link" onclick="openModal('measureModal')">Add/Remove Measure</button>
+                </div>
+                 <div class="form-group">
+                    <label class="label-red">REORDER LEVEL</label>
+                    <input type="number" id="reorderLevel" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label class="label-green">CURRENT STOCK</label>
+                    <input type="number" id="currentStock" value="0" readonly>
+                </div>
+            </form>
+            <div class="mt-20">
+                <button type="button" class="btn btn-primary" onclick="saveItem()">SAVE ITEM</button>
+                <button type="button" class="btn btn-clear" onclick="document.getElementById('addItemForm').reset()">CLEAR</button>
+            </div>
+            <hr>
+            <h3>Import Items from Excel</h3>
+            <div class="form-group">
+                <label>Select Excel File (.xlsx)</label>
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls">
+                <p style="font-size: 12px; margin-top: 5px;">
+                    Required format: 'Item Name', 'Item Code', 'Stock Page No.', 'Purch. Page No.', 'Unit Measure'. Optional: 'Reorder Level'.
+                </p>
+            </div>
+             <button class="btn btn-success mt-20" onclick="importItemsFromExcel()">Import Items</button>
+        </div>
+
+        <div id="itemList" class="sub-tab-content">
+            <h3>Item List</h3>
+            <input type="text" id="itemSearch" class="search-box" onkeyup="filterItemList()" placeholder="Search for items...">
+            <button class="btn btn-secondary" onclick="openModal('updateAllPurchPageModal')">Update All Item Purch. Page No.</button>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Item Code</th>
+                        <th>Stock Page</th>
+                        <th>Purch. Page</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Lvl</th>
+                        <th>Unit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemListBody">
+                </tbody>
+            </table>
+            <div id="paginationControls" class="pagination-controls"></div>
+             <hr>
+            <h3>Update Items from Excel</h3>
+            <div class="form-group">
+                <label>Select Excel File (.xlsx) to Update</label>
+                <input type="file" id="excelUpdateFileInput" accept=".xlsx, .xls">
+                <p style="font-size: 12px; margin-top: 5px;">
+                    Required: 'Item Code'. Can update: 'Item Name', 'Stock Page No.', 'Purch. Page No.', 'Unit Measure', 'Reorder Level'.
+                </p>
+            </div>
+             <button class="btn btn-success mt-20" onclick="updateItemsFromExcel()">Update Items</button>
+        </div>
+        
+        <div id="lowStockList" class="sub-tab-content">
+            <h3>Low Stock Items</h3>
+            <p>This list shows all items where the current stock is at or below the set reorder level.</p>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Item Code</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody id="lowStockListBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="miscItemList" class="sub-tab-content">
+            <h3>Miscellaneous Item Transaction Log</h3>
+            <p>This log shows all purchase and issue transactions for items not in the master list. Use Update to edit the source transaction.</p>
+            <input type="text" id="miscItemSearch" class="search-box" onkeyup="filterMiscItemsLog()" placeholder="Search for misc items...">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Type</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Vendor/Dept.</th>
+                        <th>Date</th>
+                        <th>Transaction No.</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="miscItemListBody">
+                </tbody>
+            </table>
+            <div id="miscPaginationControls" class="pagination-controls"></div>
+        </div>
+        
+        <div id="miscDefaults" class="sub-tab-content">
+            <h3>Miscellaneous Item Defaults</h3>
+            <p>Set the default information that will be displayed for any miscellaneous item.</p>
+            <form id="miscDefaultsForm" class="form-grid">
+                 <div class="form-group">
+                    <label class="label-normal-blue">DEFAULT ITEM CODE</label>
+                    <input type="text" id="miscDefaultCode">
+                </div>
+                 <div class="form-group">
+                    <label class="label-red">DEFAULT STOCK PAGE NO.</label>
+                    <input type="text" id="miscDefaultStockPage">
+                </div>
+                 <div class="form-group">
+                    <label class="label-violet">DEFAULT PURCH. PAGE NO.</label>
+                    <input type="text" id="miscDefaultPurchPage">
+                </div>
+            </form>
+            <div class="mt-20">
+                 <button class="btn btn-primary" onclick="saveMiscDefaults()">SAVE DEFAULTS</button>
+            </div>
+        </div>
+    </main>
+    
+    <main id="itemRates" class="tab-content">
+        <h3>Rate Per Unit Report</h3>
+        <p>This report automatically shows the most recent rate for each item based on your saved invoices.</p>
+        <input type="text" id="liveRateSearch" class="search-box" onkeyup="renderLiveRateReport()" placeholder="Search by item or vendor...">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Rate per Unit (Incl. GST)</th>
+                    <th>Vendor's Name</th>
+                </tr>
+            </thead>
+            <tbody id="liveRateListBody">
+                </tbody>
+        </table>
+        <div id="ratePaginationControls" class="pagination-controls"></div>
+    </main>
+
+    <main id="purchaseManage" class="tab-content">
+        <div class="sub-tabs">
+            <button class="sub-tab-button active" onclick="openSubTab(event, 'challanEntry', 'purchaseManage')">CHALLAN ENTRY</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'challanUpdate', 'purchaseManage'); renderSavedChallans();">CHALLAN UPDATE TO INVOICE</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'invoiceEntry', 'purchaseManage')">INVOICE ENTRY</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'viewSavedInvoice', 'purchaseManage'); filterInvoiceList();">VIEW SAVED INVOICE</button>
+        </div>
+
+        <div id="challanEntry" class="sub-tab-content active">
+            <h3>Challan Entry</h3>
+            <form id="challanEntryForm" class="form-grid">
+                <div class="form-group">
+                    <label>SELECT VENDOR NAME</label>
+                    <select id="challanVendorName"></select>
+                    <button type="button" class="btn-link" onclick="openModal('vendorModal')">Add/Edit/Delete Vendor</button>
+                </div>
+                <div class="form-group">
+                    <label>CHALLAN NUMBER</label>
+                    <input type="text" id="challanNumber">
+                </div>
+                <div class="form-group">
+                    <label>CHALLAN DATE</label>
+                    <input type="date" id="challanDate">
+                </div>
+            </form>
+            <hr>
+            <h4>Add Items to Challan</h4>
+            <div class="d-flex gap-10">
+                <input type="checkbox" id="challanMiscCheckbox" onchange="toggleMiscItem('challan')">
+                <label for="challanMiscCheckbox">Miscellaneous Item</label>
+            </div>
+             <div class="form-grid mt-20">
+                 <div class="form-group">
+                    <label>SELECT/WRITE ITEM</label>
+                    <input type="text" id="challanItemName" list="itemListData" onchange="showChallanItemDetails()">
+                    <datalist id="itemListData"></datalist>
+                    <input type="text" id="challanMiscItemName" class="hidden mt-20" placeholder="Enter Miscellaneous Item Name" oninput="showChallanItemDetails()">
+                </div>
+                <div class="form-group">
+                    <label>SUPPLIED QUANTITIES</label>
+                    <input type="number" id="challanSuppliedQty" value="0" oninput="calculateChallanNewStock()">
+                    <span id="challanNewStockResult" class="calculated-value"></span>
+                </div>
+            </div>
+            <div id="challanItemDetails" class="item-details-box" style="display:none;"></div>
+            <button type="button" class="btn btn-secondary mt-20" onclick="addItemToChallan()">ADD ITEM TO CHALLAN</button>
+            
+            <h4 class="mt-20">Items in this Challan</h4>
+            <table class="data-table">
+                <thead><tr><th>Item Name</th><th>Item Code</th><th>Supplied Qty</th><th>Action</th></tr></thead>
+                <tbody id="challanItemsTableBody"></tbody>
+            </table>
+            
+            <div class="mt-20">
+                <button class="btn btn-primary" onclick="saveChallan()">SAVE CHALLAN</button>
+                <button class="btn btn-clear" onclick="clearChallanForm()">CLEAR</button>
+            </div>
+        </div>
+
+        <div id="challanUpdate" class="sub-tab-content">
+            <h3>Saved Challans</h3>
+            <p>Select challans from the same vendor to update to a single invoice.</p>
+             <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Challan No.</th>
+                        <th>Challan Date</th>
+                        <th>Vendor</th>
+                        <th>Items</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="savedChallansBody"></tbody>
+            </table>
+            <button class="btn btn-success mt-20" onclick="prepareUpdateToInvoice()">Update to Invoice</button>
+        </div>
+
+        <div id="invoiceEntry" class="sub-tab-content">
+            <h3>Direct Invoice Entry</h3>
+            <form id="directInvoiceForm" class="form-grid">
+                <div class="form-group">
+                    <label>INVOICE NUMBER</label>
+                    <input type="text" id="directInvoiceNumber" required>
+                </div>
+                <div class="form-group">
+                    <label>INVOICE DATE</label>
+                    <input type="date" id="directInvoiceDate" required>
+                </div>
+                <div class="form-group">
+                    <label>SELECT VENDOR NAME</label>
+                    <select id="directInvoiceVendorName" required onchange="fetchRateForDirectInvoice()"></select>
+                    <button type="button" class="btn-link" onclick="openModal('vendorModal')">Add/Edit/Delete Vendor</button>
+                </div>
+                <div class="form-group">
+                    <label>Challan Number(s)</label>
+                    <input type="text" id="directInvoiceChallanNumbers" required>
+                </div>
+                 <div class="form-group">
+                    <label>Challan Date</label>
+                    <input type="date" id="directInvoiceChallanDate" required>
+                </div>
+            </form>
+            <hr>
+            <h4>Add Items to Invoice</h4>
+            <div class="d-flex gap-10">
+                <input type="checkbox" id="directInvoiceMiscCheckbox" onchange="toggleMiscItem('directInvoice')">
+                <label for="directInvoiceMiscCheckbox">Miscellaneous Item</label>
+            </div>
+            <div class="form-grid mt-20">
+                <div class="form-group">
+                    <label>SELECT/WRITE ITEM</label>
+                    <input type="text" id="directInvoiceItemName" list="itemListData" onchange="showDirectInvoiceItemDetails(); fetchRateForDirectInvoice();">
+                    <input type="text" id="directInvoiceMiscItemName" class="hidden mt-20" placeholder="Enter Miscellaneous Item Name" oninput="showDirectInvoiceItemDetails()">
+                </div>
+                <div class="form-group">
+                    <label>SUPPLIED QUANTITIES</label>
+                    <input type="number" id="directInvoiceSuppliedQty" value="0" oninput="calculateDirectInvoiceNewStock(); calculateDirectInvoiceItemValue();">
+                    <span id="directInvoiceNewStockResult" class="calculated-value"></span>
+                </div>
+                 <div class="form-group">
+                    <label>RATE</label>
+                    <input type="number" id="directInvoiceRate" value="0" oninput="calculateDirectInvoiceItemValue()">
+                </div>
+                 <div class="form-group">
+                    <label>GST %</label>
+                    <div class="d-flex">
+                        <select id="directInvoiceGst" class="w-100" onchange="calculateDirectInvoiceItemValue()"></select>
+                        <button type="button" class="btn-link" onclick="openModal('gstModal')">Manage GST</button>
+                    </div>
+                    <span id="directInvoiceItemValue" class="calculated-value label-green"></span>
+                </div>
+            </div>
+            <div id="directInvoiceItemDetails" class="item-details-box" style="display:none;"></div>
+            <div class="d-flex mt-20" style="align-items: center;">
+                <button type="button" class="btn btn-secondary" onclick="addItemToDirectInvoice()">ADD ITEM TO INVOICE</button>
+                <h4 id="directInvoiceTotalValue" class="label-red" style="margin-left: 20px;">Total Value: 0.00</h4>
+            </div>
+
+            <h4 class="mt-20">Items in this Invoice</h4>
+            <table class="data-table">
+                <thead><tr><th>Item Name</th><th>Qty</th><th>Rate</th><th>GST %</th><th>Value</th><th>Action</th></tr></thead>
+                <tbody id="directInvoiceItemsTableBody"></tbody>
+            </table>
+
+            <div class="mt-20">
+                <button class="btn btn-primary" onclick="saveDirectInvoice()">SAVE INVOICE</button>
+                <button class="btn btn-clear" onclick="clearDirectInvoiceForm()">CLEAR</button>
+            </div>
+        </div>
+
+        <div id="viewSavedInvoice" class="sub-tab-content">
+            <h3>View Saved Invoices</h3>
+            <input type="text" id="invoiceSearch" class="search-box" onkeyup="filterInvoiceList()" placeholder="Search by Invoice No. or Vendor...">
+             <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice No.</th>
+                        <th>Invoice Date</th>
+                        <th>Vendor</th>
+                        <th>Total Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="savedInvoicesBody"></tbody>
+            </table>
+            <div id="invoicePaginationControls" class="pagination-controls"></div>
+        </div>
+    </main>
+
+    <main id="issueManage" class="tab-content">
+        <div class="sub-tabs">
+            <button class="sub-tab-button active" onclick="openSubTab(event, 'requisitionEntry', 'issueManage')">REQUISITION ENTRY</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'legacyRequisitionUpload', 'issueManage')">LEGACY REQUISITION UPLOAD</button>
+            <button class="sub-tab-button" onclick="openSubTab(event, 'viewSavedRequisition', 'issueManage'); renderSavedRequisitions();">VIEW SAVED REQUISITION</button>
+        </div>
+        
+        <div id="requisitionEntry" class="sub-tab-content active">
+             <h3>Requisition Entry</h3>
+             <form id="requisitionEntryForm" class="form-grid">
+                <div class="form-group">
+                    <label>DATE</label>
+                    <input type="date" id="reqDate">
+                </div>
+                <div class="form-group">
+                    <label>REQUISITION SLIP NUMBER</label>
+                    <div class="d-flex gap-10">
+                        <input type="text" id="reqSlipNo" oninput="formatReqSlipNo(this)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>SELECT DEPARTMENT</label>
+                    <select id="reqDepartment"></select>
+                    <button type="button" class="btn-link" onclick="openModal('departmentModal')">Add/Edit/Delete Dept.</button>
+                </div>
+            </form>
+             <hr>
+            <h4>Add Items to Requisition</h4>
+             <div class="form-group">
+                <label>Select Item Type:</label>
+                <div class="d-flex gap-10">
+                    <input type="radio" id="reqStoreItemRadio" name="reqItemType" value="store" onchange="toggleRequisitionItemType('req')" checked> <label for="reqStoreItemRadio">Store Item</label>
+                    <input type="radio" id="reqMiscItemRadio" name="reqItemType" value="misc" onchange="toggleRequisitionItemType('req')"> <label for="reqMiscItemRadio">Miscellaneous Item</label>
+                </div>
+            </div>
+             <div class="form-grid mt-20">
+                 <div class="form-group">
+                    <label>SELECT ITEM</label>
+                    <select id="reqItemName" onchange="showReqItemDetails()">
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ISSUED QUANTITIES</label>
+                    <input type="number" id="reqIssuedQty" value="0" oninput="calculateReqNewStock()">
+                    <span id="reqNewStockResult" class="calculated-value"></span>
+                </div>
+            </div>
+            <div id="reqItemDetails" class="item-details-box" style="display:none;"></div>
+            <button type="button" class="btn btn-secondary mt-20" onclick="addItemToRequisition()">ADD ITEM TO REQUISITION</button>
+
+            <h4 class="mt-20">Items in this Requisition</h4>
+            <table class="data-table">
+                <thead><tr><th>Item Name</th><th>Item Code</th><th>Issued Qty</th><th>Action</th></tr></thead>
+                <tbody id="requisitionItemsTableBody"></tbody>
+            </table>
+
+            <div class="mt-20">
+                <button class="btn btn-primary" onclick="saveRequisition()">SAVE REQUISITION</button>
+                <button class="btn btn-clear" onclick="clearRequisitionForm()">CLEAR</button>
+            </div>
+        </div>
+        <div id="legacyRequisitionUpload" class="sub-tab-content">
+            <h3>Legacy Requisition Upload</h3>
+            <div class="form-group">
+                <label>Select Excel File (.xlsx) to Upload</label>
+                <input type="file" id="legacyExcelInput" accept=".xlsx, .xls">
+                <p style="font-size: 12px; margin-top: 5px;">
+                    Required format: Columns must be 'Requisition Number', 'Date' (DD/MM/YYYY), 'Department', 'Item Name', 'Issued Quantity'.
+                </p>
+            </div>
+            <button class="btn btn-success mt-20" onclick="importLegacyRequisitionsFromExcel()">Upload and Save Requisitions</button>
+        </div>
+        <div id="viewSavedRequisition" class="sub-tab-content">
+             <h3>View Saved Requisitions</h3>
+             <input type="text" id="requisitionSearch" class="search-box" onkeyup="filterRequisitionList()" placeholder="Search requisitions...">
+             <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Req. Slip/No.</th>
+                        <th>Req. Date</th>
+                        <th>Department</th>
+                        <th>Items</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="savedRequisitionsBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <main id="report" class="tab-content">
+        <h2>Reports</h2>
+        
+        <div class="report-section">
+            <h3>Current Stock Report</h3>
+            <p>Generates a list of all items (excluding Miscellaneous) with their current stock levels.</p>
+            <button class="btn btn-primary" onclick="generateStockReport('pdf')">Generate PDF</button>
+            <button class="btn btn-success" onclick="generateStockReport('excel')">Generate Excel</button>
+        </div>
+        
+        <hr>
+
+        <div class="report-section">
+            <h3>Item Ledger Report</h3>
+            <p>Generates a detailed transaction history for a single item, showing all purchases and issues within a date range.</p>
+            <div class="form-grid">
+                 <div class="form-group">
+                    <label>Select Item</label>
+                    <select id="ledgerItemSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="ledgerReportStartDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="ledgerReportEndDate">
+                </div>
+            </div>
+            <button class="btn btn-primary mt-20" onclick="generateItemLedgerReport('pdf')">Generate PDF</button>
+            <button class="btn btn-success mt-20" onclick="generateItemLedgerReport('excel')">Generate Excel</button>
+        </div>
+        
+        <hr>
+        
+        <div class="report-section">
+            <h3>Purchase Report</h3>
+            <p>Generates a detailed report of all items purchased within a specified date range.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="storePurchaseReportStartDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="storePurchaseReportEndDate">
+                </div>
+            </div>
+            <button class="btn btn-primary mt-20" onclick="generateStorePurchaseReport('pdf')">Generate PDF</button>
+            <button class="btn btn-success mt-20" onclick="generateStorePurchaseReport('excel')">Generate Excel</button>
+        </div>
+        
+        <hr>
+
+        <div class="report-section">
+            <h3>Issued Requisition Report</h3>
+            <p>Generates a hierarchical report of items issued to departments, with consumed value.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="valuedIssueReportStartDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="valuedIssueReportEndDate">
+                </div>
+            </div>
+            <button class="btn btn-primary mt-20" onclick="generateValuedIssueReport('pdf')">Generate PDF</button>
+            <button class="btn btn-success mt-20" onclick="generateValuedIssueReport('excel')">Generate Excel</button>
+        </div>
+
+        <hr>
+
+        <div class="report-section">
+            <h3>Miscellaneous Item Reports</h3>
+            <p>Generates reports for miscellaneous items purchased or issued within a date range.</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="miscReportStartDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="miscReportEndDate">
+                </div>
+            </div>
+            <h4 class="mt-20">Generate Purchase Report</h4>
+            <button class="btn btn-primary" onclick="generateMiscPurchaseReport('pdf')">PDF</button>
+            <button class="btn btn-success" onclick="generateMiscPurchaseReport('excel')">Excel</button>
+            
+            <h4 class="mt-20">Generate Issued Report</h4>
+            <button class="btn btn-primary" onclick="generateMiscIssuedReport('pdf')">PDF</button>
+            <button class="btn btn-success" onclick="generateMiscIssuedReport('excel')">Excel</button>
+        </div>
+    </main>
+    
+    <footer class="app-footer">
+        Designed and Developed by WEBEL, Administrative Department
+    </footer>
+
+</div> <div id="measureModal" class="modal-overlay" onclick="if(event.target.id === 'measureModal') closeModal('measureModal');">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Manage Measures</h3>
+            <button class="close-button" onclick="closeModal('measureModal')">&times;</button>
+        </div>
+        <div class="form-group d-flex gap-10">
+            <input type="text" id="newMeasureName" placeholder="Enter new measure name" class="w-100">
+            <button class="btn btn-primary" onclick="addMeasure()">Add</button>
+        </div>
+        <hr>
+        <div id="measureList"></div>
+    </div>
+</div>
+
+<div id="vendorModal" class="modal-overlay" onclick="if(event.target.id === 'vendorModal') closeModal('vendorModal');">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Manage Vendors</h3>
+            <button class="close-button" onclick="closeModal('vendorModal')">&times;</button>
+        </div>
+        <div class="form-group d-flex gap-10">
+            <input type="text" id="newVendorName" placeholder="Enter new vendor name" class="w-100">
+            <button class="btn btn-primary" onclick="addVendor()">Add</button>
+        </div>
+        <hr>
+        <div id="vendorList"></div>
+    </div>
+</div>
+
+<div id="departmentModal" class="modal-overlay" onclick="if(event.target.id === 'departmentModal') closeModal('departmentModal');">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Manage Departments</h3>
+            <button class="close-button" onclick="closeModal('departmentModal')">&times;</button>
+        </div>
+         <div class="form-group d-flex gap-10">
+            <input type="text" id="newDepartmentName" placeholder="Enter new department name" class="w-100">
+            <button class="btn btn-primary" onclick="addDepartment()">Add</button>
+        </div>
+        <hr>
+        <div id="departmentList"></div>
+    </div>
+</div>
+
+<div id="gstModal" class="modal-overlay" onclick="if(event.target.id === 'gstModal') closeModal('gstModal');">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Manage GST Percentages</h3>
+            <button class="close-button" onclick="closeModal('gstModal')">&times;</button>
+        </div>
+         <div class="form-group d-flex gap-10">
+            <input type="number" id="newGstValue" placeholder="Enter new GST %" class="w-100">
+            <button class="btn btn-primary" onclick="addGst()">Add</button>
+        </div>
+        <hr>
+        <div id="gstList"></div>
+    </div>
+</div>
+
+<div id="editItemModal" class="modal-overlay" onclick="if(event.target.id === 'editItemModal') closeModal('editItemModal');">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Item</h3>
+            <button class="close-button" onclick="closeModal('editItemModal')">&times;</button>
+        </div>
+        <form id="editItemForm" class="form-grid">
+            <input type="hidden" id="editItemId">
+            <div class="form-group">
+                <label class="label-deep-blue">ITEM NAME</label>
+                <input type="text" id="editItemName" required>
+            </div>
+            <div class="form-group">
+                <label class="label-normal-blue">ITEM CODE</label>
+                <input type="text" id="editItemCode" required>
+            </div>
+            <div class="form-group">
+                <label class="label-red">STOCK PAGE NO.</label>
+                <input type="number" id="editStockPageNo" required>
+            </div>
+            <div class="form-group">
+                <label class="label-violet">PURCH. PAGE NO.</label>
+                <input type="number" id="editPurchPageNo" required>
+            </div>
+            <div class="form-group">
+                <label>UNIT MEASURE</label>
+                <select id="editUnitMeasure"></select>
+            </div>
+            <div class="form-group">
+                <label class="label-red">REORDER LEVEL</label>
+                <input type="number" id="editReorderLevel" required>
+            </div>
+            <div class="form-group">
+                <label class="label-green">CURRENT STOCK</label>
+                <input type="number" id="editCurrentStock" readonly>
+            </div>
+        </form>
+        <div class="mt-20">
+            <button class="btn btn-primary" onclick="updateItem()">UPDATE ITEM</button>
+        </div>
+    </div>
+</div>
+
+<div id="editInvoiceModal" class="modal-overlay" onclick="if(event.target.id === 'editInvoiceModal') closeModal('editInvoiceModal');">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3>Edit Invoice</h3>
+            <button class="close-button" onclick="closeModal('editInvoiceModal')">&times;</button>
+        </div>
+        <div id="editInvoiceModalBody">
+            </div>
+    </div>
+</div>
+
+<div id="viewInvoiceModal" class="modal-overlay" onclick="if(event.target.id === 'viewInvoiceModal') closeModal('viewInvoiceModal');">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3>View Invoice</h3>
+            <button class="close-button" onclick="closeModal('viewInvoiceModal')">&times;</button>
+        </div>
+        <div id="viewInvoiceModalBody">
+            </div>
+    </div>
+</div>
+
+<div id="editRequisitionModal" class="modal-overlay" onclick="if(event.target.id === 'editRequisitionModal') closeModal('editRequisitionModal');">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3>Edit Requisition</h3>
+            <button class="close-button" onclick="closeModal('editRequisitionModal')">&times;</button>
+        </div>
+        <div id="editRequisitionModalBody">
+            </div>
+    </div>
+</div>
+
+<div id="viewRequisitionModal" class="modal-overlay" onclick="if(event.target.id === 'viewRequisitionModal') closeModal('viewRequisitionModal');">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>View Requisition</h3>
+            <button class="close-button" onclick="closeModal('viewRequisitionModal')">&times;</button>
+        </div>
+        <div id="viewRequisitionModalBody">
+            </div>
+    </div>
+</div>
+
+<div id="editChallanModal" class="modal-overlay" onclick="if(event.target.id === 'editChallanModal') closeModal('editChallanModal');">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-header">
+            <h3>Edit Challan</h3>
+            <button class="close-button" onclick="closeModal('editChallanModal')">&times;</button>
+        </div>
+        <div id="editChallanModalBody">
+            </div>
+    </div>
+</div>
+
+<div id="viewChallanModal" class="modal-overlay" onclick="if(event.target.id === 'viewChallanModal') closeModal('viewChallanModal');">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>View Challan</h3>
+            <button class="close-button" onclick="closeModal('viewChallanModal')">&times;</button>
+        </div>
+        <div id="viewChallanModalBody">
+            </div>
+    </div>
+</div>
+
+
+<div id="updateAllPurchPageModal" class="modal-overlay" onclick="if(event.target.id === 'updateAllPurchPageModal') closeModal('updateAllPurchPageModal');">
+     <div class="modal-content">
+        <div class="modal-header">
+            <h3>Update All Purchase Page Numbers</h3>
+            <button class="close-button" onclick="closeModal('updateAllPurchPageModal')">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>NEW PURCHASE PAGE NUMBER</label>
+            <input type="number" id="newGlobalPurchPageNo" class="w-100">
+        </div>
+        <button class="btn btn-primary mt-20" onclick="updateAllPurchPageNumbers()">Update All</button>
+    </div>
+</div>
+
+<div id="updateToInvoiceModal" class="modal-overlay" onclick="if(event.target.id === 'updateToInvoiceModal') closeModal('updateToInvoiceModal');">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header"><h3>Create Invoice from Challans</h3><button class="close-button" onclick="closeModal('updateToInvoiceModal')">&times;</button></div>
+        <div id="updateToInvoiceModalBody">
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- JAVASCRIPT LOGIC --- //
+
+    // --- DATA STORE (simulating a database with localStorage) ---
+    let items = [];
+    let vendors = [];
+    let departments = [];
+    let measures = [];
+    let gsts = [];
+    let miscItems = [];
+    let challans = [];
+    let requisitions = [];
+    let invoices = [];
+    let miscItemDefaults = {}; // NEW: For editable misc defaults
+    
+    let nextId = {};
+    let editingInvoiceOriginalState = null;
+    let editingRequisitionOriginalState = null;
+    let editingChallanOriginalState = null;
+    
+    // Pagination State
+    let currentItemPage = 1;
+    let currentMiscPage = 1;
+    let currentInvoicePage = 1;
+    let currentRatePage = 1;
+    const itemsPerPage = 25;
+    const invoicesPerPage = 30;
+    const ratesPerPage = 30;
+
+    // Temporary storage for forms
+    let tempChallanItems = [];
+    let tempDirectInvoiceItems = [];
+    let tempRequisitionItems = [];
+    let tempLegacyRequisitions = [];
+
+    // --- DATA PERSISTENCE FUNCTIONS ---
+    function saveData() {
+        const appData = {
+            items, vendors, departments, measures, gsts, miscItems, challans, requisitions, invoices, nextId, miscItemDefaults
+        };
+        localStorage.setItem('inventoryAppData', JSON.stringify(appData));
+    }
+
+    function loadData() {
+        const savedData = localStorage.getItem('inventoryAppData');
+        if (savedData) {
+            const appData = JSON.parse(savedData);
+            items = appData.items || [];
+            vendors = appData.vendors || [];
+            departments = appData.departments || [];
+            measures = appData.measures || ['Pcs', 'Kg', 'Ltr', 'Box'];
+            gsts = appData.gsts || [0, 5, 12, 18, 28];
+            miscItems = appData.miscItems || [];
+            challans = appData.challans || [];
+            requisitions = appData.requisitions || [];
+            invoices = appData.invoices || [];
+            nextId = appData.nextId || {};
+            // NEW: Load misc defaults or set them if they don't exist
+            miscItemDefaults = appData.miscItemDefaults || { code: 'M0002', stockPage: '155', purchPage: '53' };
+        } else {
+            // Default data for first-time use
+            measures = ['Pcs', 'Kg', 'Ltr', 'Box', 'Meter'];
+            gsts = [0, 5, 12, 18, 28];
+            miscItemDefaults = { code: 'M0002', stockPage: '155', purchPage: '53' };
+            nextId = { item: 1, vendor: 1, department: 1, rate: 1, misc: 1, challan: 1, requisition: 1, invoice: 1 };
+        }
+    }
+    
+    function getNextId(type) {
+        if (!nextId[type]) {
+            nextId[type] = 1;
+        }
+        return nextId[type]++;
+    }
+
+    // --- UTILITY FUNCTIONS ---
+    function populateDropdown(selectElement, data, useObject = false, key = 'name', valueKey = 'name') {
+        if (!selectElement) return;
+        selectElement.innerHTML = '';
+        data.forEach(item => {
+            const value = useObject ? item[valueKey] : item;
+            const text = useObject ? item[key] : (selectElement.id.includes('Gst') ? `${item}%` : item);
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = text;
+            selectElement.appendChild(option);
+        });
+    }
+
+
+    function populateAllDropdowns() {
+        // Main item list for purchases
+        const itemListData = document.getElementById('itemListData');
+        if (itemListData) {
+            itemListData.innerHTML = '';
+            items.forEach(item => {
+                itemListData.innerHTML += `<option value="${item.name}">`;
+            });
+        }
+        
+        populateDropdown(document.getElementById('unitMeasure'), measures);
+        populateDropdown(document.getElementById('challanVendorName'), vendors, true);
+        populateDropdown(document.getElementById('directInvoiceVendorName'), vendors, true);
+        populateDropdown(document.getElementById('reqDepartment'), departments, true);
+        populateDropdown(document.getElementById('directInvoiceGst'), gsts);
+        
+        // NEW: Populate Item Ledger dropdown
+        const ledgerItemSelect = document.getElementById('ledgerItemSelect');
+        if (ledgerItemSelect) {
+            populateDropdown(ledgerItemSelect, items.sort((a,b) => a.name.localeCompare(b.name)), true, 'name', 'id');
+        }
+    }
+    
+    function toggleMiscItem(prefix, isModal = false, modalId = '') {
+        const checkboxId = isModal ? `edit${modalId}MiscCheckbox` : `${prefix}MiscCheckbox`;
+        const isChecked = document.getElementById(checkboxId).checked;
+        
+        const storeInputId = isModal ? `edit${modalId}ItemName` : `${prefix}ItemName`;
+        const miscInputId = isModal ? `edit${modalId}MiscItemName` : `${prefix}MiscItemName`;
+        const detailsBoxId = isModal ? `edit${modalId}ItemDetails` : `${prefix}ItemDetails`;
+
+        document.getElementById(storeInputId).classList.toggle('hidden', isChecked);
+        document.getElementById(miscInputId).classList.toggle('hidden', !isChecked);
+        
+        document.getElementById(storeInputId).value = '';
+        document.getElementById(miscInputId).value = '';
+        document.getElementById(detailsBoxId).style.display = 'none';
+    }
+    
+    function updateMiscItemStock(itemName, qtyChange) {
+        let miscItem = miscItems.find(mi => mi.name.toLowerCase() === itemName.toLowerCase());
+        if (miscItem) {
+            miscItem.stock += qtyChange;
+        } else if (qtyChange > 0) { // Only add a new misc item if stock is being added
+            miscItems.push({
+                id: getNextId('misc'),
+                name: itemName,
+                stock: qtyChange
+            });
+        }
+    }
+    
+    function toggleRequisitionItemType(prefix) {
+        const itemType = document.querySelector(`input[name="${prefix}ItemType"]:checked`).value;
+        const itemSelect = document.getElementById(`${prefix}ItemName`);
+        
+        itemSelect.disabled = false;
+        itemSelect.innerHTML = '<option value="">-- Select an Item --</option>'; // Clear and add placeholder
+        
+        let sourceData = [];
+        if (itemType === 'store') {
+            sourceData = items.filter(i => i.stock > 0);
+        } else {
+            sourceData = miscItems.filter(i => i.stock > 0);
+        }
+
+        sourceData.sort((a, b) => a.name.localeCompare(b.name));
+
+        sourceData.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.textContent = item.name;
+            itemSelect.appendChild(option);
+        });
+
+        document.getElementById(`${prefix}ItemDetails`).style.display = 'none';
+        
+        const slipNoInput = document.getElementById('reqSlipNo');
+        if (slipNoInput) {
+             slipNoInput.value = '';
+             formatReqSlipNo(slipNoInput);
+        }
+    }
+
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            loadData();
+            renderAll();
+        } catch (e) {
+            console.error("Fatal error on startup:", e);
+            document.body.innerHTML = `<div style="text-align: center; padding: 40px;"><h2>Application Error</h2><p>Could not initialize the application. Please try clearing your browser's local storage for this site and refresh.</p><p><i>${e.message}</i></p></div>`;
+        }
+    });
+
+    function renderAll() {
+        filterItemList();
+        populateAllDropdowns();
+        renderMeasureList();
+        renderVendorList();
+        renderDepartmentList();
+        renderGstList();
+        filterMiscItemsLog();
+        toggleRequisitionItemType('req');
+        renderSavedChallans();
+        filterInvoiceList();
+        renderSavedRequisitions();
+        renderLowStockItems();
+        renderMiscDefaultsForm();
+    }
+
+    // --- TAB & SUB-TAB NAVIGATION ---
+    function openTab(evt, tabName) {
+        const tabcontent = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        const tablinks = document.getElementsByClassName("tab-button");
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    function openSubTab(evt, subTabName, mainTabId) {
+        const subTabContent = document.getElementById(mainTabId).getElementsByClassName("sub-tab-content");
+        for (let i = 0; i < subTabContent.length; i++) {
+            subTabContent[i].classList.remove('active');
+        }
+        const subTabLinks = document.getElementById(mainTabId).getElementsByClassName("sub-tab-button");
+        for (let i = 0; i < subTabLinks.length; i++) {
+            subTabLinks[i].classList.remove('active');
+        }
+        document.getElementById(subTabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // --- MODAL (POP-UP) CONTROLS ---
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        if (modalId === 'editInvoiceModal') editingInvoiceOriginalState = null;
+        if (modalId === 'editRequisitionModal') editingRequisitionOriginalState = null;
+        if (modalId === 'editChallanModal') editingChallanOriginalState = null;
+    }
+    
+    // --- ITEM MANAGEMENT & PAGINATION ---
+    document.getElementById('sameAsStockPage').addEventListener('change', function() {
+        if (this.checked) {
+            const stockPageNo = document.getElementById('stockPageNo').value;
+            document.getElementById('purchPageNo').value = stockPageNo;
+        } else {
+            document.getElementById('purchPageNo').value = '';
+        }
+    });
+
+    function saveItem() {
+        const newItem = {
+            id: getNextId('item'),
+            name: document.getElementById('itemName').value.trim(),
+            code: document.getElementById('itemCode').value.trim(),
+            stockPage: document.getElementById('stockPageNo').value,
+            purchPage: document.getElementById('purchPageNo').value,
+            stock: 0,
+            unit: document.getElementById('unitMeasure').value,
+            reorderLevel: parseInt(document.getElementById('reorderLevel').value) || 0
+        };
+
+        if (!newItem.name || !newItem.code) {
+            alert('Item Name and Code are required.');
+            return;
+        }
+        items.push(newItem);
+        saveData();
+        alert('Item Saved Successfully!');
+        document.getElementById('addItemForm').reset();
+        renderAll();
+    }
+    
+    function renderItemList(itemsToRender) {
+        const listBody = document.getElementById('itemListBody');
+        if (!listBody) return;
+        listBody.innerHTML = ''; 
+        
+        const start = (currentItemPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedItems = itemsToRender.slice(start, end);
+
+        paginatedItems.forEach(item => {
+            const isLowStock = item.stock <= (item.reorderLevel || 0) && item.reorderLevel > 0;
+            const rowClass = isLowStock ? 'low-stock-warning' : '';
+            const row = `
+                <tr data-item-name="${item.name.toLowerCase()}" class="${rowClass}">
+                    <td>${item.name}</td>
+                    <td>${item.code}</td>
+                    <td>${item.stockPage}</td>
+                    <td>${item.purchPage}</td>
+                    <td><strong>${item.stock}</strong></td>
+                    <td>${item.reorderLevel || 0}</td>
+                    <td>${item.unit}</td>
+                    <td>
+                        <button class="btn-link" onclick="editItem(${item.id})">Edit</button>
+                        <button class="btn-link btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+            listBody.innerHTML += row;
+        });
+    }
+
+    function renderPagination(filteredItems, controlsId, changePageFn, itemsPerPageCount, currentPageVar) {
+        const paginationControls = document.getElementById(controlsId);
+        paginationControls.innerHTML = '';
+        const pageCount = Math.ceil(filteredItems.length / itemsPerPageCount);
+        
+        if (pageCount <= 1) return;
+
+        paginationControls.innerHTML += `<button class="pagination-btn" onclick="${changePageFn.name}(${currentPageVar - 1})" ${currentPageVar === 1 ? 'disabled' : ''}>Previous</button>`;
+        for (let i = 1; i <= pageCount; i++) {
+            paginationControls.innerHTML += `<button class="pagination-btn ${i === currentPageVar ? 'active' : ''}" onclick="${changePageFn.name}(${i})">${i}</button>`;
+        }
+        paginationControls.innerHTML += `<button class="pagination-btn" onclick="${changePageFn.name}(${currentPageVar + 1})" ${currentPageVar === pageCount ? 'disabled' : ''}>Next</button>`;
+    }
+
+    function changeItemPage(page) {
+        currentItemPage = page;
+        filterItemList();
+    }
+
+    function filterItemList() {
+        const searchTerm = document.getElementById('itemSearch').value.toLowerCase();
+        let filteredItems = items.sort((a,b) => a.name.localeCompare(b.name));
+        if (searchTerm) {
+            filteredItems = items.filter(item => item.name.toLowerCase().includes(searchTerm) || item.code.toLowerCase().includes(searchTerm));
+        }
+        
+        renderItemList(filteredItems);
+        renderPagination(filteredItems, 'paginationControls', changeItemPage, itemsPerPage, currentItemPage);
+    }
+    
+    function renderLowStockItems() {
+        const listBody = document.getElementById('lowStockListBody');
+        if (!listBody) return;
+        
+        const lowStockItems = items
+            .filter(item => item.stock <= (item.reorderLevel || 0) && item.reorderLevel > 0)
+            .sort((a, b) => a.name.localeCompare(b.name));
+            
+        listBody.innerHTML = '';
+        if (lowStockItems.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="5">No items are currently low on stock.</td></tr>';
+            return;
+        }
+
+        lowStockItems.forEach(item => {
+            const row = `
+                <tr class="low-stock-warning">
+                    <td>${item.name}</td>
+                    <td>${item.code}</td>
+                    <td><strong>${item.stock}</strong></td>
+                    <td>${item.reorderLevel || 0}</td>
+                    <td>${item.unit}</td>
+                </tr>
+            `;
+            listBody.innerHTML += row;
+        });
+    }
+
+    function editItem(id) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemCode').value = item.code;
+            document.getElementById('editStockPageNo').value = item.stockPage;
+            document.getElementById('editPurchPageNo').value = item.purchPage;
+            document.getElementById('editCurrentStock').value = item.stock;
+            document.getElementById('editReorderLevel').value = item.reorderLevel || 0;
+            
+            const editUnitMeasure = document.getElementById('editUnitMeasure');
+            populateDropdown(editUnitMeasure, measures);
+            editUnitMeasure.value = item.unit;
+            openModal('editItemModal');
+        }
+    }
+    
+    function updateItem() {
+        const id = parseInt(document.getElementById('editItemId').value);
+        const itemIndex = items.findIndex(i => i.id === id);
+        if (itemIndex > -1) {
+            items[itemIndex].name = document.getElementById('editItemName').value.trim();
+            items[itemIndex].code = document.getElementById('editItemCode').value.trim();
+            items[itemIndex].stockPage = document.getElementById('editStockPageNo').value;
+            items[itemIndex].purchPage = document.getElementById('editPurchPageNo').value;
+            items[itemIndex].unit = document.getElementById('editUnitMeasure').value;
+            items[itemIndex].reorderLevel = parseInt(document.getElementById('editReorderLevel').value) || 0;
+        }
+        saveData();
+        closeModal('editItemModal');
+        renderAll();
+        alert('Item updated!');
+    }
+
+
+    function deleteItem(id) {
+        if (confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+            items = items.filter(i => i.id !== id);
+            saveData();
+            renderAll();
+        }
+    }
+    
+    function updateAllPurchPageNumbers() {
+        const newPageNo = document.getElementById('newGlobalPurchPageNo').value;
+        if (!newPageNo) {
+            alert('Please enter a new page number.');
+            return;
+        }
+        if (confirm(`Are you sure you want to update ALL items' purchase page number to ${newPageNo}?`)) {
+            items.forEach(item => {
+                item.purchPage = newPageNo;
+            });
+            saveData();
+            filterItemList();
+            closeModal('updateAllPurchPageModal');
+            alert('All purchase page numbers updated.');
+        }
+    }
+    
+    function importItemsFromExcel() {
+        const fileInput = document.getElementById('excelFileInput');
+        if (fileInput.files.length === 0) {
+            alert('Please select an Excel file to import.');
+            return;
+        }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                let importedCount = 0;
+                json.forEach(row => {
+                    if (row['Item Name'] && row['Item Code']) {
+                        items.push({
+                            id: getNextId('item'),
+                            name: String(row['Item Name']),
+                            code: String(row['Item Code']),
+                            stockPage: String(row['Stock Page No.'] || ''),
+                            purchPage: String(row['Purch. Page No.'] || ''),
+                            stock: 0,
+                            unit: String(row['Unit Measure'] || 'Pcs'),
+                            reorderLevel: parseInt(row['Reorder Level']) || 0
+                        });
+                        importedCount++;
+                    }
+                });
+                saveData();
+                renderAll();
+                alert(`${importedCount} items imported successfully!`);
+            } catch (e) {
+                console.error("Error reading Excel file:", e);
+                alert("Error reading file. Please ensure it's a valid Excel file and the format is correct.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    
+    function updateItemsFromExcel() {
+        const fileInput = document.getElementById('excelUpdateFileInput');
+        if (fileInput.files.length === 0) {
+            alert('Please select an Excel file.');
+            return;
+        }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+                let updatedCount = 0;
+
+                json.forEach(row => {
+                    const itemCode = String(row['Item Code']);
+                    if (!itemCode) return;
+
+                    const itemIndex = items.findIndex(item => item.code === itemCode);
+                    if (itemIndex > -1) {
+                        if (row['Item Name']) items[itemIndex].name = String(row['Item Name']);
+                        if (row['Stock Page No.']) items[itemIndex].stockPage = String(row['Stock Page No.']);
+                        if (row['Purch. Page No.']) items[itemIndex].purchPage = String(row['Purch. Page No.']);
+                        if (row['Unit Measure']) items[itemIndex].unit = String(row['Unit Measure']);
+                        if (row['Reorder Level'] !== undefined) items[itemIndex].reorderLevel = parseInt(row['Reorder Level']) || 0;
+                        updatedCount++;
+                    }
+                });
+
+                saveData();
+                renderAll();
+                alert(`${updatedCount} items updated successfully from Excel file.`);
+            } catch (e) {
+                console.error("Error updating from Excel:", e);
+                alert("An error occurred. Please check the file format and content.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+    
+    // --- MISCELLANEOUS ITEMS ---
+    function renderMiscDefaultsForm() {
+        document.getElementById('miscDefaultCode').value = miscItemDefaults.code;
+        document.getElementById('miscDefaultStockPage').value = miscItemDefaults.stockPage;
+        document.getElementById('miscDefaultPurchPage').value = miscItemDefaults.purchPage;
+    }
+    
+    function saveMiscDefaults() {
+        miscItemDefaults.code = document.getElementById('miscDefaultCode').value.trim();
+        miscItemDefaults.stockPage = document.getElementById('miscDefaultStockPage').value.trim();
+        miscItemDefaults.purchPage = document.getElementById('miscDefaultPurchPage').value.trim();
+        saveData();
+        alert('Miscellaneous item defaults saved successfully!');
+    }
+
+    function renderMiscItemsLog(logEntries) {
+        const listBody = document.getElementById('miscItemListBody');
+        listBody.innerHTML = '';
+        
+        const start = (currentMiscPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedItems = logEntries.slice(start, end);
+
+        if (paginatedItems.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="8">No miscellaneous items found.</td></tr>';
+            return;
+        }
+
+        paginatedItems.forEach(entry => {
+            listBody.innerHTML += `
+                <tr>
+                    <td>${entry.name}</td>
+                    <td>${entry.type}</td>
+                    <td>${entry.qty}</td>
+                    <td>${entry.rate !== undefined ? entry.rate.toFixed(2) : 'N/A'}</td>
+                    <td>${entry.source}</td>
+                    <td>${formatDateToDDMMYYYY(entry.date)}</td>
+                    <td>${entry.transactionNo}</td>
+                    <td>
+                        <button class="btn-link" onclick="openTransactionSource('${entry.id}')">Update</button>
+                        <button class="btn-link btn-danger" onclick="deleteMiscTransaction('${entry.id}')">Delete</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function filterMiscItemsLog() {
+        const searchTerm = document.getElementById('miscItemSearch').value.toLowerCase();
+        let log = [];
+
+        invoices.forEach(inv => {
+            inv.items.forEach((item, index) => {
+                if (item.isMisc) {
+                    log.push({
+                        id: `inv-${inv.id}-${index}`,
+                        name: item.name, type: 'Purchase', qty: item.qty, rate: item.rate,
+                        source: inv.vendor, date: inv.date, transactionNo: inv.number
+                    });
+                }
+            });
+        });
+        
+        challans.forEach(c => {
+            if (c.status === 'pending') {
+                 c.items.forEach((item, index) => {
+                    if (item.isMisc) {
+                        log.push({
+                            id: `challan-${c.id}-${index}`,
+                            name: item.name, type: 'Supplied', qty: item.qty, rate: undefined,
+                            source: c.vendor, date: c.date, transactionNo: c.number
+                        });
+                    }
+                });
+            }
+        });
+
+        requisitions.forEach(req => {
+            req.items.forEach((item, index) => {
+                if (item.isMisc) {
+                    log.push({
+                        id: `req-${req.id}-${index}`,
+                        name: item.name, type: 'Issue', qty: item.qty, rate: undefined,
+                        source: req.department, date: req.date, transactionNo: req.slipNo
+                    });
+                }
+            });
+        });
+        
+        const filteredLog = log.filter(entry => entry.name.toLowerCase().includes(searchTerm) || entry.source.toLowerCase().includes(searchTerm));
+        renderMiscItemsLog(filteredLog);
+        renderPagination(filteredLog, 'miscPaginationControls', changeMiscPage, itemsPerPage, currentMiscPage);
+    }
+
+    function changeMiscPage(page) {
+        currentMiscPage = page;
+        filterMiscItemsLog();
+    }
+    
+    function openTransactionSource(logId) {
+        const [type, transactionIdStr] = logId.split('-');
+        const transactionId = parseInt(transactionIdStr);
+
+        switch(type) {
+            case 'inv': editInvoice(transactionId); break;
+            case 'challan': editChallan(transactionId); break;
+            case 'req': editRequisition(transactionId); break;
+            default: alert("Could not find the source of this transaction.");
+        }
+    }
+
+    function deleteMiscTransaction(logId) {
+        if (!confirm("Are you sure you want to delete this miscellaneous item transaction? This will reverse the stock change and cannot be undone.")) return;
+
+        const [type, transactionId, itemIndex] = logId.split('-');
+        const id = parseInt(transactionId);
+        const index = parseInt(itemIndex);
+
+        let transaction, stockChangeSign = 0;
+
+        if (type === 'inv') {
+            transaction = invoices.find(inv => inv.id === id); stockChangeSign = -1;
+        } else if (type === 'challan') {
+            transaction = challans.find(c => c.id === id); stockChangeSign = -1;
+        } else if (type === 'req') {
+            transaction = requisitions.find(r => r.id === id); stockChangeSign = 1;
+        }
+
+        if (transaction && transaction.items[index]) {
+            const item = transaction.items[index];
+            updateMiscItemStock(item.name, item.qty * stockChangeSign);
+            transaction.items.splice(index, 1);
+            if (type === 'inv') {
+                transaction.totalAmount = transaction.items.reduce((sum, i) => sum + (i.qty * i.rate * (1 + i.gst / 100)), 0);
+            }
+            saveData();
+            renderAll();
+            alert("Transaction item deleted and stock adjusted.");
+        } else {
+            alert("Error: Could not find the transaction item to delete.");
+        }
+    }
+    
+    // --- RATE OF ITEMS (NEW LIVE REPORT) ---
+    function getLiveRates() {
+        const latestRates = new Map();
+        const sortedInvoices = [...invoices].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        for (const invoice of sortedInvoices) {
+            for (const item of invoice.items) {
+                const key = `${item.name}|${invoice.vendor}`;
+                if (!latestRates.has(key)) {
+                    latestRates.set(key, {
+                        itemName: item.name,
+                        rateWithGst: (item.rate * (1 + item.gst / 100)).toFixed(2),
+                        vendorName: invoice.vendor
+                    });
+                }
+            }
+        }
+        return Array.from(latestRates.values()).sort((a,b) => a.itemName.localeCompare(b.itemName));
+    }
+    
+    function changeRatePage(page) {
+        currentRatePage = page;
+        renderLiveRateReport();
+    }
+
+    function renderLiveRateReport() {
+        const rates = getLiveRates();
+        const body = document.getElementById('liveRateListBody');
+        const searchTerm = document.getElementById('liveRateSearch').value.toLowerCase();
+        
+        body.innerHTML = '';
+        let filteredRates = rates;
+        if (searchTerm) {
+            filteredRates = rates.filter(r => r.itemName.toLowerCase().includes(searchTerm) || r.vendorName.toLowerCase().includes(searchTerm));
+        }
+        
+        const start = (currentRatePage - 1) * ratesPerPage;
+        const end = start + ratesPerPage;
+        const paginatedRates = filteredRates.slice(start, end);
+        
+        if (paginatedRates.length === 0) {
+            body.innerHTML = '<tr><td colspan="3">No rates found in invoice history.</td></tr>';
+            renderPagination([], 'ratePaginationControls', changeRatePage, ratesPerPage, currentRatePage);
+            return;
+        }
+
+        paginatedRates.forEach(rate => {
+            body.innerHTML += `<tr data-search-term="${rate.itemName.toLowerCase()} ${rate.vendorName.toLowerCase()}"><td>${rate.itemName}</td><td>${rate.rateWithGst}</td><td>${rate.vendorName}</td></tr>`;
+        });
+        
+        renderPagination(filteredRates, 'ratePaginationControls', changeRatePage, ratesPerPage, currentRatePage);
+    }
+    
+    function fetchRateForDirectInvoice() {
+        const itemName = document.getElementById('directInvoiceItemName').value;
+        const vendorName = document.getElementById('directInvoiceVendorName').value;
+        const itemFromInvoice = invoices.flatMap(inv => inv.items).find(i => i.name === itemName && inv.vendor === vendorName);
+        if (itemFromInvoice) {
+            document.getElementById('directInvoiceRate').value = itemFromInvoice.rate;
+            document.getElementById('directInvoiceGst').value = itemFromInvoice.gst;
+            calculateDirectInvoiceItemValue();
+        }
+    }
+
+
+    // --- PURCHASE MANAGEMENT (CHALLAN) ---
+    function showChallanItemDetails() {
+        const isMisc = document.getElementById('challanMiscCheckbox').checked;
+        const itemName = isMisc ? document.getElementById('challanMiscItemName').value : document.getElementById('challanItemName').value;
+        const detailsBox = document.getElementById('challanItemDetails');
+
+        if (!itemName) {
+            detailsBox.style.display = 'none';
+            return;
+        }
+        
+        if (isMisc) {
+            const miscItem = miscItems.find(mi => mi.name.toLowerCase() === itemName.toLowerCase());
+            const currentStock = miscItem ? miscItem.stock : 0;
+            detailsBox.innerHTML = `
+                <div><span class="label-normal-blue">ITEM CODE:</span> ${miscItemDefaults.code}</div>
+                <div><span class="label-red">STOCK PAGE NO:</span> ${miscItemDefaults.stockPage}</div>
+                <div><span class="label-violet">PURCH. PAGE NO:</span> ${miscItemDefaults.purchPage}</div>
+                <div><span class="label-green">CURRENT STOCK:</span> <span id="challanCurrentStockValue">${currentStock}</span></div>
+            `;
+            detailsBox.style.display = 'grid';
+            calculateChallanNewStock();
+        } else {
+            const item = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+            if (item) {
+                detailsBox.innerHTML = `
+                    <div><span class="label-normal-blue">ITEM CODE:</span> ${item.code}</div>
+                    <div><span class="label-red">STOCK PAGE NO:</span> ${item.stockPage}</div>
+                    <div><span class="label-violet">PURCH. PAGE NO:</span> ${item.purchPage}</div>
+                    <div><span class="label-green">CURRENT STOCK:</span> <span id="challanCurrentStockValue">${item.stock}</span></div>
+                `;
+                detailsBox.style.display = 'grid';
+                calculateChallanNewStock();
+            } else {
+                detailsBox.style.display = 'none';
+            }
+        }
+    }
+
+    function calculateChallanNewStock() {
+        const currentStockEl = document.getElementById('challanCurrentStockValue');
+        if (!currentStockEl) return;
+        const currentStock = parseInt(currentStockEl.innerText);
+        const suppliedQty = parseInt(document.getElementById('challanSuppliedQty').value) || 0;
+        document.getElementById('challanNewStockResult').innerText = `New Stock: ${currentStock + suppliedQty}`;
+    }
+    
+    function addItemToChallan() {
+        const isMisc = document.getElementById('challanMiscCheckbox').checked;
+        const itemName = (isMisc ? document.getElementById('challanMiscItemName').value : document.getElementById('challanItemName').value).trim();
+        const suppliedQty = parseInt(document.getElementById('challanSuppliedQty').value);
+        
+        if (!itemName || !suppliedQty || suppliedQty <= 0) {
+            alert('Please select/enter an item and a valid quantity.');
+            return;
+        }
+        
+        const itemDetails = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        const item = itemDetails ? {...itemDetails} : { id: null, name: itemName, code: miscItemDefaults.code };
+
+        tempChallanItems.push({
+            itemId: item.id, name: item.name, code: item.code, qty: suppliedQty, isMisc: !itemDetails
+        });
+
+        renderTempChallanItems();
+        document.getElementById('challanItemName').value = '';
+        document.getElementById('challanMiscItemName').value = '';
+        document.getElementById('challanSuppliedQty').value = 0;
+        document.getElementById('challanItemDetails').style.display = 'none';
+        document.getElementById('challanNewStockResult').innerText = '';
+    }
+    
+    function renderTempChallanItems() {
+        const tableBody = document.getElementById('challanItemsTableBody');
+        tableBody.innerHTML = '';
+        tempChallanItems.forEach((item, index) => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.code}</td>
+                    <td>${item.qty}</td>
+                    <td><button class="btn-link" onclick="removeTempChallanItem(${index})">Remove</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function removeTempChallanItem(index) {
+        tempChallanItems.splice(index, 1);
+        renderTempChallanItems();
+    }
+
+    function saveChallan() {
+        const challanNumber = document.getElementById('challanNumber').value.trim();
+        const challanDate = document.getElementById('challanDate').value;
+        const vendorName = document.getElementById('challanVendorName').value;
+
+        if (!challanNumber || !challanDate || !vendorName || tempChallanItems.length === 0) {
+            alert('Please fill all challan details and add at least one item.');
+            return;
+        }
+
+        const newChallan = {
+            id: getNextId('challan'), number: challanNumber, date: challanDate,
+            vendor: vendorName, items: [...tempChallanItems], status: 'pending'
+        };
+
+        challans.push(newChallan);
+
+        newChallan.items.forEach(challanItem => {
+            if (challanItem.isMisc) {
+                updateMiscItemStock(challanItem.name, challanItem.qty);
+            } else {
+                const itemInDb = items.find(i => i.id === challanItem.itemId);
+                if (itemInDb) itemInDb.stock += challanItem.qty;
+            }
+        });
+        
+        saveData();
+        alert('Challan saved successfully and stock updated!');
+        clearChallanForm();
+        renderAll();
+    }
+
+    function clearChallanForm() {
+        document.getElementById('challanEntryForm').reset();
+        tempChallanItems = [];
+        renderTempChallanItems();
+    }
+
+    function renderSavedChallans() {
+        const body = document.getElementById('savedChallansBody');
+        body.innerHTML = '';
+        const pendingChallans = challans.filter(c => c.status === 'pending').sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        if (pendingChallans.length === 0) {
+            body.innerHTML = '<tr><td colspan="6">No pending challans found.</td></tr>';
+            return;
+        }
+
+        pendingChallans.forEach(c => {
+            const itemsSummary = c.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+            body.innerHTML += `
+                <tr>
+                    <td><input type="checkbox" class="challan-checkbox" value="${c.id}" data-vendor="${c.vendor}"></td>
+                    <td>${c.number}</td>
+                    <td>${formatDateToDDMMYYYY(c.date)}</td>
+                    <td>${c.vendor}</td>
+                    <td>${itemsSummary}</td>
+                    <td>
+                        <button class="btn-link" onclick="viewChallan(${c.id})">View</button>
+                        <button class="btn-link" onclick="editChallan(${c.id})">Edit</button>
+                        <button class="btn-link btn-danger" onclick="deleteChallan(${c.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function deleteChallan(id) {
+        if (!confirm('Are you sure you want to delete this challan? This WILL revert stock changes and cannot be undone.')) return;
+        
+        const challanIndex = challans.findIndex(c => c.id === id);
+        if (challanIndex > -1) {
+            const challanToDelete = challans[challanIndex];
+            challanToDelete.items.forEach(challanItem => {
+                if (challanItem.isMisc) {
+                    updateMiscItemStock(challanItem.name, -challanItem.qty);
+                } else {
+                    const itemInDb = items.find(i => i.id === challanItem.itemId);
+                    if (itemInDb) itemInDb.stock -= challanItem.qty;
+                }
+            });
+            challans.splice(challanIndex, 1);
+            saveData();
+            renderAll();
+            alert('Challan deleted and stock reverted.');
+        }
+    }
+
+    function prepareUpdateToInvoice() {
+        const selectedCheckboxes = document.querySelectorAll('.challan-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('Please select at least one challan.');
+            return;
+        }
+
+        const firstVendor = selectedCheckboxes[0].dataset.vendor;
+        const selectedChallanIds = [];
+        
+        for (const checkbox of selectedCheckboxes) {
+            if (checkbox.dataset.vendor !== firstVendor) {
+                alert('You can only select challans from the same vendor.');
+                return;
+            }
+            selectedChallanIds.push(parseInt(checkbox.value));
+        }
+
+        const challansToInvoice = challans.filter(c => selectedChallanIds.includes(c.id));
+        const allItems = challansToInvoice.flatMap(c => c.items);
+        
+        const aggregatedItems = allItems.reduce((acc, item) => {
+            const existing = acc.find(i => i.name === item.name);
+            if (existing) {
+                existing.qty += item.qty;
+            } else {
+                acc.push({ ...item });
+            }
+            return acc;
+        }, []);
+
+        const modalBody = document.getElementById('updateToInvoiceModalBody');
+        const challanNumbers = challansToInvoice.map(c => c.number).join(', ');
+
+        modalBody.innerHTML = `
+            <div class="form-grid">
+                <div class="form-group"><label>Vendor</label><input type="text" id="challanToInvoiceVendor" value="${firstVendor}" readonly></div>
+                <div class="form-group"><label>Selected Challans</label><input type="text" value="${challanNumbers}" readonly></div>
+                <div class="form-group"><label>Invoice Number</label><input type="text" id="invoiceNumberModal"></div>
+                <div class="form-group"><label>Invoice Date</label><input type="date" id="invoiceDateModal"></div>
+            </div> <hr> <h4>Items to Invoice</h4>
+            <div class="modal-table-container">
+                <table class="data-table">
+                    <thead><tr><th>Item</th><th>Total Qty</th><th>Rate</th><th>GST %</th><th>Value</th></tr></thead>
+                    <tbody id="invoiceItemsModalBody"></tbody>
+                </table>
+            </div>
+            <h3 class="mt-20">Total Invoice Amount: <span id="totalInvoiceAmountModal">0.00</span></h3>
+            <div class="mt-20">
+                <button class="btn btn-primary" onclick="saveInvoiceFromChallans(${JSON.stringify(selectedChallanIds)})">Save to Invoice</button>
+            </div>
+        `;
+        
+        const invoiceItemsBody = document.getElementById('invoiceItemsModalBody');
+        let gstOptions = gsts.map(g => `<option value="${g}">${g}%</option>`).join('');
+        const liveRates = getLiveRates();
+
+        aggregatedItems.forEach((item, index) => {
+            const liveRateInfo = liveRates.find(r => r.itemName === item.name && r.vendorName === firstVendor);
+            let rate = 0, gst = 0;
+            if (liveRateInfo) {
+                const itemFromInvoice = invoices.flatMap(inv => inv.items).find(i => i.name === item.name && inv.vendor === firstVendor);
+                if(itemFromInvoice) { rate = itemFromInvoice.rate; gst = itemFromInvoice.gst; }
+            }
+            invoiceItemsBody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td> <td>${item.qty}</td>
+                    <td><input type="number" class="invoice-rate" value="${rate}" oninput="calculateInvoiceTotal()" data-index="${index}"></td>
+                    <td><select class="invoice-gst" onchange="calculateInvoiceTotal()" data-index="${index}">${gstOptions}</select></td>
+                    <td class="invoice-value">0.00</td>
+                </tr>
+            `;
+             invoiceItemsBody.querySelector(`select[data-index="${index}"]`).value = gst;
+        });
+        calculateInvoiceTotal();
+        openModal('updateToInvoiceModal');
+    }
+
+    function calculateInvoiceTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll('#invoiceItemsModalBody tr');
+        rows.forEach(row => {
+            const qty = parseFloat(row.cells[1].innerText);
+            const rate = parseFloat(row.querySelector('.invoice-rate').value) || 0;
+            const gst = parseFloat(row.querySelector('.invoice-gst').value) || 0;
+            const value = qty * rate * (1 + gst / 100);
+            row.cells[4].innerText = value.toFixed(2);
+            total += value;
+        });
+        document.getElementById('totalInvoiceAmountModal').innerText = total.toFixed(2);
+    }
+    
+    function saveInvoiceFromChallans(challanIds) {
+        const invoiceNumber = document.getElementById('invoiceNumberModal').value.trim();
+        const invoiceDate = document.getElementById('invoiceDateModal').value;
+        const vendorName = document.getElementById('challanToInvoiceVendor').value;
+
+        if (!invoiceNumber || !invoiceDate) {
+            alert('Please provide Invoice Number and Date.'); return;
+        }
+
+        const relatedChallans = challans.filter(c => challanIds.includes(c.id));
+        const challanNumbers = relatedChallans.map(c => c.number).join(', ');
+        const challanDates = [...new Set(relatedChallans.map(c => formatDateToDDMMYYYY(c.date)))].join(', ');
+        challanIds.forEach(id => { const challan = challans.find(c => c.id === id); if (challan) challan.status = 'invoiced'; });
+        
+        const invoiceItems = [];
+        document.querySelectorAll('#invoiceItemsModalBody tr').forEach(row => {
+            const name = row.cells[0].innerText;
+            const itemDetails = items.find(i => i.name === name);
+            invoiceItems.push({
+                itemId: itemDetails ? itemDetails.id : null, name: name,
+                qty: parseFloat(row.cells[1].innerText),
+                rate: parseFloat(row.querySelector('.invoice-rate').value) || 0,
+                gst: parseFloat(row.querySelector('.invoice-gst').value) || 0,
+                isMisc: !itemDetails
+            });
+        });
+
+        invoices.push({
+            id: getNextId('invoice'), number: invoiceNumber, date: invoiceDate, vendor: vendorName, items: invoiceItems,
+            totalAmount: parseFloat(document.getElementById('totalInvoiceAmountModal').innerText),
+            challanIds: challanIds, challanNumbers: challanNumbers, challanDate: challanDates
+        });
+
+        saveData();
+        alert('Invoice created successfully!');
+        closeModal('updateToInvoiceModal');
+        renderSavedChallans();
+        filterInvoiceList();
+    }
+    
+    // --- PURCHASE MANAGEMENT (DIRECT INVOICE) ---
+    function showDirectInvoiceItemDetails() {
+        const isMisc = document.getElementById('directInvoiceMiscCheckbox').checked;
+        const itemName = isMisc ? document.getElementById('directInvoiceMiscItemName').value : document.getElementById('directInvoiceItemName').value;
+        const detailsBox = document.getElementById('directInvoiceItemDetails');
+
+        if (!itemName) {
+            detailsBox.style.display = 'none'; return;
+        }
+
+        if (isMisc) {
+            const miscItem = miscItems.find(mi => mi.name.toLowerCase() === itemName.toLowerCase());
+            const currentStock = miscItem ? miscItem.stock : 0;
+            detailsBox.innerHTML = `
+                <div><span class="label-normal-blue">ITEM CODE:</span> ${miscItemDefaults.code}</div>
+                <div><span class="label-red">STOCK PAGE NO:</span> ${miscItemDefaults.stockPage}</div>
+                <div><span class="label-violet">PURCH. PAGE NO:</span> ${miscItemDefaults.purchPage}</div>
+                <div><span class="label-green">CURRENT STOCK:</span> <span id="directInvoiceCurrentStockValue">${currentStock}</span></div>
+            `;
+            detailsBox.style.display = 'grid';
+            calculateDirectInvoiceNewStock();
+        } else {
+            const item = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+            if (item) {
+                detailsBox.innerHTML = `
+                    <div><span class="label-normal-blue">ITEM CODE:</span> ${item.code}</div>
+                    <div><span class="label-red">STOCK PAGE NO:</span> ${item.stockPage}</div>
+                    <div><span class="label-violet">PURCH. PAGE NO:</span> ${item.purchPage}</div>
+                    <div><span class="label-green">CURRENT STOCK:</span> <span id="directInvoiceCurrentStockValue">${item.stock}</span></div>
+                `;
+                detailsBox.style.display = 'grid';
+                calculateDirectInvoiceNewStock();
+            } else {
+                 detailsBox.style.display = 'none';
+            }
+        }
+    }
+
+    function calculateDirectInvoiceNewStock() {
+        const currentStockEl = document.getElementById('directInvoiceCurrentStockValue');
+        if (!currentStockEl) return;
+        const currentStock = parseInt(currentStockEl.innerText);
+        const suppliedQty = parseInt(document.getElementById('directInvoiceSuppliedQty').value) || 0;
+        document.getElementById('directInvoiceNewStockResult').innerText = `New Stock: ${currentStock + suppliedQty}`;
+    }
+    
+    function calculateDirectInvoiceItemValue() {
+        const qty = parseFloat(document.getElementById('directInvoiceSuppliedQty').value) || 0;
+        const rate = parseFloat(document.getElementById('directInvoiceRate').value) || 0;
+        const gst = parseFloat(document.getElementById('directInvoiceGst').value) || 0;
+        const value = qty * rate * (1 + gst / 100);
+        document.getElementById('directInvoiceItemValue').innerText = `Item Value: ${value.toFixed(2)}`;
+    }
+
+    function addItemToDirectInvoice() {
+        const isMisc = document.getElementById('directInvoiceMiscCheckbox').checked;
+        const itemName = (isMisc ? document.getElementById('directInvoiceMiscItemName').value : document.getElementById('directInvoiceItemName').value).trim();
+        const qty = parseInt(document.getElementById('directInvoiceSuppliedQty').value);
+        const rate = parseFloat(document.getElementById('directInvoiceRate').value);
+        const gst = parseFloat(document.getElementById('directInvoiceGst').value);
+        
+        if (!itemName || !qty || qty <= 0 || isNaN(rate) || isNaN(gst)) {
+            alert('Please fill item name, quantity, rate, and GST.'); return;
+        }
+        
+        const itemDetails = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        const item = itemDetails ? {...itemDetails} : { id: null, name: itemName, code: miscItemDefaults.code };
+        const value = qty * rate * (1 + gst / 100);
+
+        tempDirectInvoiceItems.push({
+            itemId: item.id, name: item.name, qty, rate, gst, value, isMisc: !itemDetails
+        });
+
+        renderTempDirectInvoiceItems();
+        updateDirectInvoiceTotalValue();
+        document.getElementById('directInvoiceItemName').value = '';
+        document.getElementById('directInvoiceMiscItemName').value = '';
+        document.getElementById('directInvoiceSuppliedQty').value = 0;
+        document.getElementById('directInvoiceRate').value = 0;
+        document.getElementById('directInvoiceGst').value = gsts[0] || 0;
+        document.getElementById('directInvoiceItemDetails').style.display = 'none';
+        document.getElementById('directInvoiceNewStockResult').innerText = '';
+        document.getElementById('directInvoiceItemValue').innerText = '';
+    }
+    
+    function updateDirectInvoiceTotalValue() {
+        const totalValue = tempDirectInvoiceItems.reduce((sum, item) => sum + item.value, 0);
+        document.getElementById('directInvoiceTotalValue').innerText = `Total Value: ${totalValue.toFixed(2)}`;
+    }
+
+    function renderTempDirectInvoiceItems() {
+        const tableBody = document.getElementById('directInvoiceItemsTableBody');
+        tableBody.innerHTML = '';
+        tempDirectInvoiceItems.forEach((item, index) => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td> <td>${item.qty}</td> <td>${item.rate.toFixed(2)}</td>
+                    <td>${item.gst}%</td> <td>${item.value.toFixed(2)}</td>
+                    <td><button class="btn-link" onclick="removeTempDirectInvoiceItem(${index})">Remove</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function removeTempDirectInvoiceItem(index) {
+        tempDirectInvoiceItems.splice(index, 1);
+        renderTempDirectInvoiceItems();
+        updateDirectInvoiceTotalValue();
+    }
+
+    function saveDirectInvoice() {
+        const invoiceNumber = document.getElementById('directInvoiceNumber').value.trim();
+        const invoiceDate = document.getElementById('directInvoiceDate').value;
+        const vendorName = document.getElementById('directInvoiceVendorName').value;
+        const challanNumbers = document.getElementById('directInvoiceChallanNumbers').value;
+        const challanDateInput = document.getElementById('directInvoiceChallanDate').value;
+        
+        if (!invoiceNumber || !invoiceDate || !vendorName || tempDirectInvoiceItems.length === 0 || !challanNumbers || !challanDateInput) {
+            alert('Please fill all Invoice AND Challan details, and add at least one item.'); return;
+        }
+        
+        const newInvoice = {
+            id: getNextId('invoice'), number: invoiceNumber, date: invoiceDate, vendor: vendorName,
+            totalAmount: tempDirectInvoiceItems.reduce((sum, item) => sum + item.value, 0),
+            items: [...tempDirectInvoiceItems], challanNumbers: challanNumbers,
+            challanDate: formatDateToDDMMYYYY(challanDateInput),
+        };
+        invoices.push(newInvoice);
+
+        newInvoice.items.forEach(invoiceItem => {
+            if (invoiceItem.isMisc) {
+                updateMiscItemStock(invoiceItem.name, invoiceItem.qty);
+            } else {
+                const itemInDb = items.find(i => i.id === invoiceItem.itemId);
+                if (itemInDb) itemInDb.stock += invoiceItem.qty;
+            }
+        });
+
+        saveData();
+        alert('Invoice saved successfully and stock updated!');
+        clearDirectInvoiceForm();
+        renderAll();
+    }
+
+    function clearDirectInvoiceForm() {
+        document.getElementById('directInvoiceForm').reset();
+        tempDirectInvoiceItems = [];
+        renderTempDirectInvoiceItems();
+        updateDirectInvoiceTotalValue();
+    }
+    
+    // --- VIEW/EDIT SAVED INVOICES ---
+    function renderSavedInvoices(invoicesToRender) {
+        const listBody = document.getElementById('savedInvoicesBody');
+        if (!listBody) return;
+        listBody.innerHTML = ''; 
+        
+        const start = (currentInvoicePage - 1) * invoicesPerPage;
+        const end = start + invoicesPerPage;
+        const paginatedInvoices = invoicesToRender.slice(start, end);
+
+        if (paginatedInvoices.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="5">No invoices found.</td></tr>';
+            return;
+        }
+
+        paginatedInvoices.forEach(inv => {
+            listBody.innerHTML += `
+                <tr>
+                    <td>${inv.number}</td> <td>${formatDateToDDMMYYYY(inv.date)}</td>
+                    <td>${inv.vendor}</td> <td>${inv.totalAmount.toFixed(2)}</td>
+                    <td>
+                        <button class="btn-link" onclick="viewInvoice(${inv.id})">View</button>
+                        <button class="btn-link" onclick="editInvoice(${inv.id})">Edit</button>
+                        <button class="btn-link btn-danger" onclick="deleteInvoice(${inv.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function changeInvoicePage(page) {
+        currentInvoicePage = page;
+        filterInvoiceList();
+    }
+
+    function filterInvoiceList() {
+        const searchTerm = document.getElementById('invoiceSearch').value.toLowerCase();
+        let filteredInvoices = invoices.sort((a,b) => new Date(b.date) - new Date(a.date));
+        if (searchTerm) {
+            filteredInvoices = invoices.filter(inv => inv.number.toLowerCase().includes(searchTerm) || inv.vendor.toLowerCase().includes(searchTerm));
+        }
+        
+        renderSavedInvoices(filteredInvoices);
+        renderPagination(filteredInvoices, 'invoicePaginationControls', changeInvoicePage, invoicesPerPage, currentInvoicePage);
+    }
+    
+    function deleteInvoice(id) {
+        if (!confirm('Are you sure you want to delete this invoice? This will NOT revert stock changes and is irreversible.')) return;
+        invoices = invoices.filter(inv => inv.id !== id);
+        saveData();
+        filterInvoiceList();
+    }
+    
+    function editInvoice(id) {
+        const invoice = invoices.find(inv => inv.id === id);
+        if (!invoice) return;
+
+        editingInvoiceOriginalState = JSON.parse(JSON.stringify(invoice));
+        const modalBody = document.getElementById('editInvoiceModalBody');
+        let gstOptions = gsts.map(g => `<option value="${g}">${g}%</option>`).join('');
+        
+        modalBody.innerHTML = `
+            <form id="editInvoiceForm" class="form-grid">
+                <input type="hidden" id="editingInvoiceId" value="${invoice.id}">
+                <div class="form-group"> <label>Invoice Number</label> <input type="text" id="editingInvoiceNumber" value="${invoice.number}" required> </div>
+                <div class="form-group"> <label>Invoice Date</label> <input type="date" id="editingInvoiceDate" value="${invoice.date}" required> </div>
+                <div class="form-group"> <label>Vendor</label> <select id="editingInvoiceVendor"></select> </div>
+                <div class="form-group"> <label>Challan Number(s)</label> <input type="text" id="editingChallanNumbers" value="${invoice.challanNumbers || ''}" required> </div>
+                <div class="form-group"> <label>Challan Date(s)</label> <input type="text" id="editingChallanDates" value="${invoice.challanDate || ''}" required> </div>
+            </form>
+            <hr>
+            <h4>Edit Existing Items</h4>
+            <div class="modal-table-container"> <table class="data-table"> <thead><tr><th>Item Name</th><th>Qty</th><th>Rate</th><th>GST %</th><th>Value</th><th>Action</th></tr></thead> <tbody id="editingInvoiceItemsTableBody"></tbody> </table> </div>
+            <h3 id="editingInvoiceTotalValue" class="mt-20 label-red">Total Value: 0.00</h3>
+            <hr>
+            <h4>Add New Item to Invoice</h4>
+            <div class="d-flex gap-10"> <input type="checkbox" id="editInvoiceMiscCheckbox" onchange="toggleMiscItem('Invoice', true, 'Invoice')"> <label for="editInvoiceMiscCheckbox">Miscellaneous Item</label> </div>
+            <div class="form-grid mt-20">
+                <div class="form-group"> <label>SELECT/WRITE ITEM</label> <input type="text" id="editInvoiceItemName" list="itemListData" onchange="showEditInvoiceItemDetails()"> <input type="text" id="editInvoiceMiscItemName" class="hidden mt-20" placeholder="Enter Miscellaneous Item Name" oninput="showEditInvoiceItemDetails()"> </div>
+                <div class="form-group"> <label>SUPPLIED QUANTITIES</label> <input type="number" id="editInvoiceSuppliedQty" value="0" oninput="calculateEditInvoiceNewStock(); calculateEditInvoiceItemValue();"> <span id="editInvoiceNewStockResult" class="calculated-value"></span> </div>
+                <div class="form-group"> <label>RATE</label> <input type="number" id="editInvoiceRate" value="0" oninput="calculateEditInvoiceItemValue()"> </div>
+                <div class="form-group"> <label>GST %</label> <div class="d-flex"> <select id="editInvoiceGst" class="w-100" onchange="calculateEditInvoiceItemValue()">${gstOptions}</select> </div> <span id="editInvoiceItemValue" class="calculated-value label-green"></span> </div>
+            </div>
+            <div id="editInvoiceItemDetails" class="item-details-box" style="display:none;"></div>
+            <button type="button" class="btn btn-secondary mt-20" onclick="addItemToInvoiceInEdit()">ADD ITEM TO INVOICE</button>
+            <hr>
+            <div class="mt-20"> <button class="btn btn-primary" onclick="updateInvoice()">UPDATE INVOICE</button> <button class="btn btn-clear" onclick="closeModal('editInvoiceModal')">CANCEL</button> </div>
+        `;
+        
+        const vendorDropdown = document.getElementById('editingInvoiceVendor');
+        populateDropdown(vendorDropdown, vendors, true);
+        vendorDropdown.value = invoice.vendor;
+        toggleMiscItem('Invoice', true, 'Invoice'); // Initialize hidden state
+        
+        renderEditingInvoiceItems();
+        openModal('editInvoiceModal');
+    }
+    
+    function renderEditingInvoiceItems() {
+        const tableBody = document.getElementById('editingInvoiceItemsTableBody');
+        tableBody.innerHTML = '';
+        const gstOptions = gsts.map(g => `<option value="${g}">${g}%</option>`).join('');
+
+        editingInvoiceOriginalState.items.forEach((item, index) => {
+            const value = (item.qty * item.rate * (1 + item.gst / 100)).toFixed(2);
+            tableBody.innerHTML += `
+                <tr data-index="${index}" data-name="${item.name}">
+                    <td>${item.name}</td>
+                    <td><input type="number" class="editing-qty" value="${item.qty}" oninput="calculateEditingInvoiceValue(${index})"></td>
+                    <td><input type="number" class="editing-rate" value="${item.rate}" oninput="calculateEditingInvoiceValue(${index})"></td>
+                    <td><select class="editing-gst" onchange="calculateEditingInvoiceValue(${index})">${gstOptions}</select></td>
+                    <td class="editing-value">${value}</td>
+                    <td><button class="btn-link btn-danger" onclick="removeEditingInvoiceItem(${index})">Remove</button></td>
+                </tr>
+            `;
+            tableBody.querySelector(`tr[data-index="${index}"] .editing-gst`).value = item.gst;
+        });
+        calculateEditingInvoiceTotal();
+    }
+
+    function calculateEditingInvoiceValue(index) {
+        const row = document.querySelector(`#editingInvoiceItemsTableBody tr[data-index="${index}"]`);
+        const qty = parseFloat(row.querySelector('.editing-qty').value) || 0;
+        const rate = parseFloat(row.querySelector('.editing-rate').value) || 0;
+        const gst = parseFloat(row.querySelector('.editing-gst').value) || 0;
+        const value = qty * rate * (1 + gst / 100);
+        row.querySelector('.editing-value').innerText = value.toFixed(2);
+        calculateEditingInvoiceTotal();
+    }
+    
+    function calculateEditingInvoiceTotal() {
+        let total = 0;
+        document.querySelectorAll('#editingInvoiceItemsTableBody tr').forEach(row => {
+            total += parseFloat(row.querySelector('.editing-value').innerText) || 0;
+        });
+        document.getElementById('editingInvoiceTotalValue').innerText = `Total Value: ${total.toFixed(2)}`;
+    }
+
+    function removeEditingInvoiceItem(index) {
+        editingInvoiceOriginalState.items.splice(index, 1);
+        renderEditingInvoiceItems();
+    }
+
+    function updateInvoice() {
+        const invoiceId = parseInt(document.getElementById('editingInvoiceId').value);
+        const invoiceInDbIndex = invoices.findIndex(inv => inv.id === invoiceId);
+        if (invoiceInDbIndex === -1) return;
+
+        const originalInvoiceBeforeEdit = JSON.parse(localStorage.getItem('inventoryAppData')).invoices.find(i => i.id === invoiceId);
+        if (!originalInvoiceBeforeEdit) { alert("Error: Could not find original invoice state."); return; }
+        
+        const originalItems = originalInvoiceBeforeEdit.items;
+        const updatedItemsFromModal = [];
+        
+        editingInvoiceOriginalState.items.forEach((item, index) => {
+             const row = document.querySelector(`#editingInvoiceItemsTableBody tr[data-index="${index}"]`);
+             if (row) {
+                updatedItemsFromModal.push({
+                    ...item,
+                    qty: parseFloat(row.querySelector('.editing-qty').value) || 0,
+                    rate: parseFloat(row.querySelector('.editing-rate').value) || 0,
+                    gst: parseFloat(row.querySelector('.editing-gst').value) || 0,
+                });
+             } else { // Item was newly added and not in the original table
+                updatedItemsFromModal.push(item);
+             }
+        });
+        
+        const originalQtyMap = new Map(originalItems.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const updatedQtyMap = new Map(updatedItemsFromModal.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const allItemKeys = new Set([...originalQtyMap.keys(), ...updatedQtyMap.keys()]);
+
+        allItemKeys.forEach(key => {
+            const difference = (updatedQtyMap.get(key) || 0) - (originalQtyMap.get(key) || 0);
+            if (difference === 0) return;
+            const isMisc = key.startsWith('misc-');
+            if (isMisc) {
+                updateMiscItemStock(key.replace('misc-', ''), difference);
+            } else {
+                const itemInStock = items.find(i => i.id === parseInt(key.replace('store-', '')));
+                if (itemInStock) itemInStock.stock += difference;
+            }
+        });
+
+        const invoiceToUpdate = invoices[invoiceInDbIndex];
+        invoiceToUpdate.number = document.getElementById('editingInvoiceNumber').value;
+        invoiceToUpdate.date = document.getElementById('editingInvoiceDate').value;
+        invoiceToUpdate.vendor = document.getElementById('editingInvoiceVendor').value;
+        invoiceToUpdate.challanNumbers = document.getElementById('editingChallanNumbers').value;
+        invoiceToUpdate.challanDate = document.getElementById('editingChallanDates').value;
+        invoiceToUpdate.items = updatedItemsFromModal.map(item => ({...item, value: item.qty * item.rate * (1 + item.gst / 100)}));
+        invoiceToUpdate.totalAmount = invoiceToUpdate.items.reduce((sum, item) => sum + item.value, 0);
+
+        saveData();
+        alert('Invoice updated successfully! Stock has been adjusted.');
+        closeModal('editInvoiceModal');
+        filterInvoiceList();
+        renderAll();
+    }
+    
+    function viewInvoice(id) {
+        const invoice = invoices.find(inv => inv.id === id);
+        if (!invoice) return;
+
+        let itemsHtml = invoice.items.map(item => {
+            const value = item.qty * item.rate * (1 + item.gst / 100);
+            return `<tr><td>${item.name}</td><td>${item.isMisc ? miscItemDefaults.code : (items.find(i=>i.id === item.itemId)?.code || 'N/A')}</td><td>${item.qty}</td><td>${item.rate.toFixed(2)}</td><td>${item.gst}%</td><td>${value.toFixed(2)}</td></tr>`;
+        }).join('');
+
+        document.getElementById('viewInvoiceModalBody').innerHTML = `
+            <div class="form-grid">
+                <div class="form-group"><label>Invoice Number</label><p><strong>${invoice.number}</strong></p></div>
+                <div class="form-group"><label>Invoice Date</label><p><strong>${formatDateToDDMMYYYY(invoice.date)}</strong></p></div>
+                <div class="form-group"><label>Vendor</label><p><strong>${invoice.vendor}</strong></p></div>
+                <div class="form-group"><label>Challan Number(s)</label><p><strong>${invoice.challanNumbers || 'N/A'}</strong></p></div>
+                 <div class="form-group"><label>Challan Date(s)</label><p><strong>${invoice.challanDate || 'N/A'}</strong></p></div>
+            </div> <hr> <h4>Invoice Items</h4>
+            <div class="modal-table-container"> <table class="data-table"> <thead><tr><th>Item Name</th><th>Code</th><th>Qty</th><th>Rate</th><th>GST</th><th>Value</th></tr></thead> <tbody>${itemsHtml}</tbody> </table> </div>
+            <h3 class="mt-20 label-red">Total Amount: ${invoice.totalAmount.toFixed(2)}</h3>
+        `;
+        openModal('viewInvoiceModal');
+    }
+
+    function showEditInvoiceItemDetails() {
+        const isMisc = document.getElementById('editInvoiceMiscCheckbox').checked;
+        const itemName = isMisc ? document.getElementById('editInvoiceMiscItemName').value : document.getElementById('editInvoiceItemName').value;
+        const detailsBox = document.getElementById('editInvoiceItemDetails');
+
+        if (!itemName) { detailsBox.style.display = 'none'; return; }
+
+        if (isMisc) {
+            const miscItem = miscItems.find(mi => mi.name.toLowerCase() === itemName.toLowerCase());
+            detailsBox.innerHTML = `
+                <div><span class="label-normal-blue">ITEM CODE:</span> ${miscItemDefaults.code}</div>
+                <div><span class="label-red">STOCK PAGE NO:</span> ${miscItemDefaults.stockPage}</div>
+                <div><span class="label-violet">PURCH. PAGE NO:</span> ${miscItemDefaults.purchPage}</div>
+                <div><span class="label-green">CURRENT STOCK:</span> <span id="editInvoiceCurrentStockValue">${miscItem ? miscItem.stock : 0}</span></div>
+            `;
+        } else {
+            const item = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+            if (item) {
+                detailsBox.innerHTML = `
+                    <div><span class="label-normal-blue">ITEM CODE:</span> ${item.code}</div>
+                    <div><span class="label-red">STOCK PAGE NO:</span> ${item.stockPage}</div>
+                    <div><span class="label-violet">PURCH. PAGE NO:</span> ${item.purchPage}</div>
+                    <div><span class="label-green">CURRENT STOCK:</span> <span id="editInvoiceCurrentStockValue">${item.stock}</span></div>
+                `;
+            } else { detailsBox.style.display = 'none'; return; }
+        }
+        detailsBox.style.display = 'grid';
+        calculateEditInvoiceNewStock();
+    }
+
+    function calculateEditInvoiceNewStock() {
+        const currentStockEl = document.getElementById('editInvoiceCurrentStockValue');
+        if (!currentStockEl) return;
+        const suppliedQty = parseInt(document.getElementById('editInvoiceSuppliedQty').value) || 0;
+        document.getElementById('editInvoiceNewStockResult').innerText = `New Stock: ${parseInt(currentStockEl.innerText) + suppliedQty}`;
+    }
+
+    function calculateEditInvoiceItemValue() {
+        const qty = parseFloat(document.getElementById('editInvoiceSuppliedQty').value) || 0;
+        const rate = parseFloat(document.getElementById('editInvoiceRate').value) || 0;
+        const gst = parseFloat(document.getElementById('editInvoiceGst').value) || 0;
+        document.getElementById('editInvoiceItemValue').innerText = `Item Value: ${(qty * rate * (1 + gst / 100)).toFixed(2)}`;
+    }
+
+    function addItemToInvoiceInEdit() {
+        const isMisc = document.getElementById('editInvoiceMiscCheckbox').checked;
+        const itemName = (isMisc ? document.getElementById('editInvoiceMiscItemName').value : document.getElementById('editInvoiceItemName').value).trim();
+        const qty = parseInt(document.getElementById('editInvoiceSuppliedQty').value);
+        const rate = parseFloat(document.getElementById('editInvoiceRate').value);
+        const gst = parseFloat(document.getElementById('editInvoiceGst').value);
+        
+        if (!itemName || !qty || qty <= 0 || isNaN(rate) || isNaN(gst)) {
+            alert('Please fill item name, quantity, rate, and GST.'); return;
+        }
+        if (editingInvoiceOriginalState.items.some(i => i.name === itemName)) {
+            alert('This item is already in the invoice. Edit the quantity in the table above.'); return;
+        }
+        
+        const itemDetails = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        
+        editingInvoiceOriginalState.items.push({
+            itemId: itemDetails ? itemDetails.id : null, name: itemName, qty, rate, gst, isMisc: !itemDetails
+        });
+
+        renderEditingInvoiceItems();
+
+        document.getElementById('editInvoiceItemName').value = '';
+        document.getElementById('editInvoiceMiscItemName').value = '';
+        document.getElementById('editInvoiceSuppliedQty').value = 0;
+        document.getElementById('editInvoiceRate').value = 0;
+        document.getElementById('editInvoiceGst').value = gsts[0] || 0;
+        document.getElementById('editInvoiceItemDetails').style.display = 'none';
+        document.getElementById('editInvoiceNewStockResult').innerText = '';
+        document.getElementById('editInvoiceItemValue').innerText = '';
+    }
+
+
+    // --- ISSUE REQUISITION (REGULAR) ---
+    function formatReqSlipNo(input) {
+        const itemType = document.querySelector('input[name="reqItemType"]:checked')?.value;
+        if (!itemType) return;
+        let value = input.value;
+        if (itemType === 'misc') {
+            if (!value.startsWith('RD-')) value = 'RD-' + value.replace(/^R-|^RD-/, '');
+        } else {
+            let numericPart = value.replace('R-', '').replace(/[^0-9]/g, '');
+            value = numericPart ? 'R-' + numericPart : '';
+        }
+        input.value = value;
+    }
+
+    function showReqItemDetails() {
+        const itemType = document.querySelector('input[name="reqItemType"]:checked').value;
+        const isMisc = itemType === 'misc';
+        const itemName = document.getElementById('reqItemName').value;
+        const detailsBox = document.getElementById('reqItemDetails');
+        
+        if (!itemName) { detailsBox.style.display = 'none'; return; }
+
+        const itemSource = isMisc ? miscItems : items;
+        const item = itemSource.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        
+        if (item) {
+             if (item.stock <= 0) {
+                 alert('This item is out of stock.');
+                 document.getElementById('reqItemName').value = '';
+                 detailsBox.style.display = 'none'; return;
+             }
+            detailsBox.innerHTML = isMisc ?
+                `<div><span class="label-normal-blue">ITEM CODE:</span> ${miscItemDefaults.code}</div> <div><span class="label-green">CURRENT STOCK:</span> <span id="reqCurrentStockValue">${item.stock}</span></div>` :
+                `<div><span class="label-normal-blue">ITEM CODE:</span> ${item.code || 'N/A'}</div> <div><span class="label-red">STOCK PAGE NO:</span> ${item.stockPage || 'N/A'}</div> <div><span class="label-violet">PURCH. PAGE NO:</span> ${item.purchPage || 'N/A'}</div> <div><span class="label-green">CURRENT STOCK:</span> <span id="reqCurrentStockValue">${item.stock}</span></div>`;
+            detailsBox.style.display = 'grid';
+            calculateReqNewStock();
+        } else {
+            detailsBox.style.display = 'none';
+        }
+    }
+
+    function calculateReqNewStock() {
+        const currentStockEl = document.getElementById('reqCurrentStockValue');
+        if (!currentStockEl) return;
+        const currentStock = parseInt(currentStockEl.innerText);
+        const issuedQty = parseInt(document.getElementById('reqIssuedQty').value) || 0;
+
+        if (issuedQty > currentStock) {
+            document.getElementById('reqNewStockResult').innerText = `Error: Not enough stock!`;
+            document.getElementById('reqNewStockResult').style.color = 'red';
+        } else {
+            document.getElementById('reqNewStockResult').innerText = `New Stock: ${currentStock - issuedQty}`;
+            document.getElementById('reqNewStockResult').style.color = 'var(--text-red)';
+        }
+    }
+
+    function addItemToRequisition() {
+        const isMisc = document.querySelector('input[name="reqItemType"]:checked').value === 'misc';
+        const itemName = document.getElementById('reqItemName').value.trim();
+        const issuedQty = parseInt(document.getElementById('reqIssuedQty').value);
+        
+        if (!itemName || !issuedQty || issuedQty <= 0) {
+            alert('Please select/enter an item and a valid quantity.'); return;
+        }
+        
+        const itemSource = isMisc ? miscItems : items;
+        const itemDetails = itemSource.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        
+        if (!itemDetails) { alert('Item not found.'); return; }
+        if (issuedQty > itemDetails.stock) { alert('Cannot issue more than the current stock.'); return; }
+        
+        tempRequisitionItems.push({
+            itemId: itemDetails.id, name: itemDetails.name,
+            code: itemDetails.code || miscItemDefaults.code, qty: issuedQty, isMisc: isMisc
+        });
+
+        renderTempRequisitionItems();
+        document.getElementById('reqItemName').value = '';
+        document.getElementById('reqIssuedQty').value = 0;
+        document.getElementById('reqItemDetails').style.display = 'none';
+        document.getElementById('reqNewStockResult').innerText = '';
+    }
+
+    function renderTempRequisitionItems() {
+        const tableBody = document.getElementById('requisitionItemsTableBody');
+        tableBody.innerHTML = '';
+        tempRequisitionItems.forEach((item, index) => {
+            tableBody.innerHTML += `<tr><td>${item.name}</td><td>${item.code}</td><td>${item.qty}</td><td><button class="btn-link" onclick="removeTempRequisitionItem(${index})">Remove</button></td></tr>`;
+        });
+    }
+
+    function removeTempRequisitionItem(index) {
+        tempRequisitionItems.splice(index, 1);
+        renderTempRequisitionItems();
+    }
+
+    function saveRequisition() {
+        const reqDate = document.getElementById('reqDate').value;
+        const reqSlipNoRaw = document.getElementById('reqSlipNo').value;
+        const department = document.getElementById('reqDepartment').value;
+
+        if (!reqDate || !reqSlipNoRaw || !department || tempRequisitionItems.length === 0) {
+            alert('Please fill all requisition details and add at least one item.'); return;
+        }
+        
+        const newRequisition = {
+            id: getNextId('requisition'), slipNo: reqSlipNoRaw, date: reqDate,
+            department: department, items: [...tempRequisitionItems], type: 'Regular'
+        };
+
+        requisitions.push(newRequisition);
+        newRequisition.items.forEach(reqItem => {
+            if (reqItem.isMisc) {
+                updateMiscItemStock(reqItem.name, -reqItem.qty);
+            } else {
+                const itemInDb = items.find(i => i.id === reqItem.itemId);
+                if (itemInDb) itemInDb.stock -= reqItem.qty;
+            }
+        });
+
+        saveData();
+        alert('Requisition saved successfully and stock updated!');
+        clearRequisitionForm();
+        renderAll();
+    }
+
+    function clearRequisitionForm() {
+        document.getElementById('requisitionEntryForm').reset();
+        tempRequisitionItems = [];
+        renderTempRequisitionItems();
+    }
+    
+    // --- LEGACY REQUISITION UPLOAD ---
+    function importLegacyRequisitionsFromExcel() {
+        const fileInput = document.getElementById('legacyExcelInput');
+        if (fileInput.files.length === 0) { alert('Please select an Excel file.'); return; }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                let importedCount = 0, skippedCount = 0;
+                json.forEach(row => {
+                    const reqNumber = row['Requisition Number'], date = excelDateToJSDate(row['Date']),
+                          department = row['Department'], itemName = row['Item Name'], qty = parseInt(row['Issued Quantity']);
+
+                    if (reqNumber && date && department && itemName && qty > 0) {
+                        let itemDetails = items.find(i => i.name === itemName);
+                        let isMisc = !itemDetails;
+                        if(isMisc) itemDetails = miscItems.find(i => i.name === itemName);
+
+                        if (itemDetails && itemDetails.stock >= qty) {
+                            requisitions.push({
+                                id: getNextId('requisition'), slipNo: String(reqNumber), date: date, department: String(department),
+                                items: [{ itemId: itemDetails.id, name: itemName, code: itemDetails.code || miscItemDefaults.code, qty: qty, isMisc: isMisc }],
+                                type: 'Legacy'
+                            });
+                            isMisc ? updateMiscItemStock(itemName, -qty) : (itemDetails.stock -= qty);
+                            importedCount++;
+                        } else { skippedCount++; }
+                    } else { skippedCount++; }
+                });
+                saveData();
+                renderAll();
+                alert(`${importedCount} legacy requisitions imported! ${skippedCount} rows skipped.`);
+            } catch (e) {
+                console.error("Error reading Excel file:", e);
+                alert("Error reading file. Please check format.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function excelDateToJSDate(excelDate) {
+        if (typeof excelDate === 'number') {
+            return new Date(Math.round((excelDate - 25569) * 86400 * 1000)).toISOString().split('T')[0];
+        }
+        if (typeof excelDate === 'string') {
+            const parts = excelDate.split('/');
+            if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+        return null;
+    }
+
+    // --- VIEW SAVED REQUISITIONS ---
+    function renderSavedRequisitions() {
+        const body = document.getElementById('savedRequisitionsBody');
+        body.innerHTML = '';
+        const sortedRequisitions = [...requisitions].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        if (sortedRequisitions.length === 0) {
+            body.innerHTML = '<tr><td colspan="5">No requisitions found.</td></tr>'; return;
+        }
+
+        sortedRequisitions.forEach(r => {
+            const itemsSummary = r.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+            body.innerHTML += `
+                <tr data-search-term="${String(r.slipNo).toLowerCase()} ${r.department.toLowerCase()} ${itemsSummary.toLowerCase()}">
+                    <td>${r.slipNo}</td><td>${formatDateToDDMMYYYY(r.date)}</td><td>${r.department}</td><td>${itemsSummary}</td>
+                    <td>
+                        <button class="btn-link" onclick="viewRequisition(${r.id})">View</button>
+                        <button class="btn-link" onclick="editRequisition(${r.id})">Edit</button>
+                        <button class="btn-link btn-danger" onclick="deleteRequisition(${r.id})">Delete</button>
+                    </td>
+                </tr>`;
+        });
+    }
+    
+    function deleteRequisition(id) {
+        if (!confirm('Are you sure? This WILL revert stock changes and cannot be undone.')) return;
+        
+        const reqIndex = requisitions.findIndex(r => r.id === id);
+        if (reqIndex > -1) {
+            const reqToDelete = requisitions[reqIndex];
+            reqToDelete.items.forEach(reqItem => {
+                 if (reqItem.isMisc) {
+                    updateMiscItemStock(reqItem.name, reqItem.qty);
+                } else {
+                    const itemInDb = items.find(i => i.id === reqItem.itemId);
+                    if (itemInDb) itemInDb.stock += reqItem.qty;
+                }
+            });
+            requisitions.splice(reqIndex, 1);
+            saveData();
+            renderAll();
+            alert('Requisition deleted and stock reverted.');
+        }
+    }
+    
+    function filterRequisitionList() {
+        const searchTerm = document.getElementById('requisitionSearch').value.toLowerCase();
+        document.querySelectorAll('#savedRequisitionsBody tr').forEach(row => {
+            row.style.display = row.dataset.searchTerm.includes(searchTerm) ? '' : 'none';
+        });
+    }
+
+    function viewRequisition(id) {
+        const req = requisitions.find(r => r.id === id);
+        if (!req) return;
+        let itemsHtml = req.items.map(item => `<tr><td>${item.name}</td><td>${item.code}</td><td>${item.qty}</td></tr>`).join('');
+        document.getElementById('viewRequisitionModalBody').innerHTML = `
+            <div class="form-grid">
+                <div class="form-group"><label>Requisition Slip/No.</label><p><strong>${req.slipNo}</strong></p></div>
+                <div class="form-group"><label>Requisition Date</label><p><strong>${formatDateToDDMMYYYY(req.date)}</strong></p></div>
+                <div class="form-group"><label>Department</label><p><strong>${req.department}</strong></p></div>
+            </div><hr><h4>Requisition Items</h4>
+            <div class="modal-table-container"><table class="data-table"><thead><tr><th>Item Name</th><th>Code</th><th>Issued Qty</th></tr></thead><tbody>${itemsHtml}</tbody></table></div>
+        `;
+        openModal('viewRequisitionModal');
+    }
+
+    function editRequisition(id) {
+        const req = requisitions.find(r => r.id === id);
+        if (!req) return;
+        editingRequisitionOriginalState = JSON.parse(JSON.stringify(req));
+        const isStoreReq = !req.items.some(i => i.isMisc);
+        const itemType = isStoreReq ? 'store' : 'misc';
+
+        let addItemInputHtml = `<label>SELECT ITEM</label><select id="editReqItemName" onchange="showEditReqItemDetails('${itemType}')"></select>`;
+        
+        document.getElementById('editRequisitionModalBody').innerHTML = `
+            <form id="editRequisitionForm" class="form-grid">
+                <input type="hidden" id="editingRequisitionId" value="${req.id}">
+                <div class="form-group"><label>Req. Slip/No.</label><input type="text" id="editingReqSlipNo" value="${req.slipNo}" required></div>
+                <div class="form-group"><label>Req. Date</label><input type="date" id="editingReqDate" value="${req.date}" required></div>
+                <div class="form-group"><label>Department</label><select id="editingReqDept"></select></div>
+            </form><hr><h4>Edit Items</h4>
+            <div class="modal-table-container"><table class="data-table"><thead><tr><th>Item Name</th><th>Issued Qty</th><th>Action</th></tr></thead><tbody id="editingRequisitionItemsTableBody"></tbody></table></div><hr>
+            <h4>Add New Item</h4> <div class="form-grid mt-20"> <div class="form-group">${addItemInputHtml}</div> <div class="form-group"><label>ISSUED QTY</label><input type="number" id="editReqIssuedQty" value="0" oninput="calculateEditReqNewStock()"><span id="editReqNewStockResult" class="calculated-value"></span></div></div>
+            <div id="editReqItemDetails" class="item-details-box" style="display:none;"></div>
+            <button type="button" class="btn btn-secondary mt-20" onclick="addItemToRequisitionInEdit('${itemType}')">ADD ITEM</button><hr>
+            <div class="mt-20"><button class="btn btn-primary" onclick="updateRequisition()">UPDATE REQUISITION</button><button class="btn btn-clear" onclick="closeModal('editRequisitionModal')">CANCEL</button></div>
+        `;
+
+        const deptDropdown = document.getElementById('editingReqDept');
+        populateDropdown(deptDropdown, departments, true);
+        deptDropdown.value = req.department;
+
+        const newItemDropdown = document.getElementById('editReqItemName');
+        const sourceData = (isStoreReq ? items : miscItems).filter(i => i.stock > 0);
+        populateDropdown(newItemDropdown, [{name: '-- Select an Item --', id: ''}, ...sourceData.sort((a,b)=>a.name.localeCompare(b.name))], true, 'name', 'name');
+
+        renderEditingRequisitionItems();
+        openModal('editRequisitionModal');
+    }
+
+    function renderEditingRequisitionItems() {
+        const tableBody = document.getElementById('editingRequisitionItemsTableBody');
+        tableBody.innerHTML = '';
+        editingRequisitionOriginalState.items.forEach((item, index) => {
+            tableBody.innerHTML += `<tr data-index="${index}" data-name="${item.name}"><td>${item.name}</td><td><input type="number" class="editing-req-qty" value="${item.qty}" style="padding: 5px; width: 80px;"></td><td><button class="btn-link btn-danger" onclick="removeEditingRequisitionItem('${item.name}')">Remove</button></td></tr>`;
+        });
+    }
+
+    function removeEditingRequisitionItem(itemName) {
+        editingRequisitionOriginalState.items = editingRequisitionOriginalState.items.filter(i => i.name !== itemName);
+        renderEditingRequisitionItems();
+    }
+
+    function updateRequisition() {
+        const reqId = parseInt(document.getElementById('editingRequisitionId').value);
+        const reqInDbIndex = requisitions.findIndex(r => r.id === reqId);
+        if (reqInDbIndex === -1) return;
+
+        const originalReq = JSON.parse(localStorage.getItem('inventoryAppData')).requisitions.find(r => r.id === reqId);
+        const updatedItemsFromModal = editingRequisitionOriginalState.items.map(item => {
+            const row = document.querySelector(`#editingRequisitionItemsTableBody tr[data-name="${item.name}"]`);
+            return row ? { ...item, qty: parseInt(row.querySelector('.editing-req-qty').value) || 0 } : item;
+        });
+
+        const originalQtyMap = new Map(originalReq.items.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const updatedQtyMap = new Map(updatedItemsFromModal.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const allItemKeys = new Set([...originalQtyMap.keys(), ...updatedQtyMap.keys()]);
+
+        allItemKeys.forEach(key => {
+            const difference = (originalQtyMap.get(key) || 0) - (updatedQtyMap.get(key) || 0);
+            if (difference === 0) return;
+            const isMisc = key.startsWith('misc-');
+            if (isMisc) {
+                updateMiscItemStock(key.replace('misc-', ''), difference);
+            } else {
+                const itemInStock = items.find(i => i.id === parseInt(key.replace('store-', '')));
+                if (itemInStock) itemInStock.stock += difference;
+            }
+        });
+
+        const reqToUpdate = requisitions[reqInDbIndex];
+        reqToUpdate.slipNo = document.getElementById('editingReqSlipNo').value;
+        reqToUpdate.date = document.getElementById('editingReqDate').value;
+        reqToUpdate.department = document.getElementById('editingReqDept').value;
+        reqToUpdate.items = updatedItemsFromModal;
+
+        saveData();
+        alert('Requisition updated and stock adjusted.');
+        closeModal('editRequisitionModal');
+        renderAll();
+    }
+    
+    function showEditReqItemDetails(itemType) {
+        const isMisc = itemType === 'misc';
+        const itemName = document.getElementById('editReqItemName').value;
+        const detailsBox = document.getElementById('editReqItemDetails');
+        if (!itemName) { detailsBox.style.display = 'none'; return; }
+
+        const itemSource = isMisc ? miscItems : items;
+        const item = itemSource.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        
+        if (item) {
+            detailsBox.innerHTML = isMisc ? `<div><span class="label-green">CURRENT STOCK:</span> <span id="editReqCurrentStockValue">${item.stock}</span></div>` :
+                `<div><span class="label-normal-blue">ITEM CODE:</span> ${item.code||'N/A'}</div><div><span class="label-green">CURRENT STOCK:</span> <span id="editReqCurrentStockValue">${item.stock}</span></div>`;
+            detailsBox.style.display = 'grid';
+            calculateEditReqNewStock();
+        } else {
+            detailsBox.style.display = 'none';
+        }
+    }
+
+    function calculateEditReqNewStock() {
+        const currentStockEl = document.getElementById('editReqCurrentStockValue');
+        if (!currentStockEl) return;
+        const currentStock = parseInt(currentStockEl.innerText);
+        const issuedQty = parseInt(document.getElementById('editReqIssuedQty').value) || 0;
+        const resultEl = document.getElementById('editReqNewStockResult');
+
+        if (issuedQty > currentStock) {
+            resultEl.innerText = `Error: Not enough stock!`;
+            resultEl.style.color = 'red';
+        } else {
+            resultEl.innerText = `New Stock: ${currentStock - issuedQty}`;
+            resultEl.style.color = 'var(--text-red)';
+        }
+    }
+
+    function addItemToRequisitionInEdit(itemType) {
+        const isMisc = itemType === 'misc';
+        const itemName = document.getElementById('editReqItemName').value.trim();
+        const issuedQty = parseInt(document.getElementById('editReqIssuedQty').value);
+        
+        if (!itemName || issuedQty <= 0) { alert('Please select item and valid quantity.'); return; }
+        if (editingRequisitionOriginalState.items.some(i => i.name === itemName)) { alert('Item already in requisition.'); return; }
+
+        const itemSource = isMisc ? miscItems : items;
+        const itemDetails = itemSource.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        
+        if (!itemDetails || issuedQty > itemDetails.stock) { alert('Item not found or insufficient stock.'); return; }
+        
+        editingRequisitionOriginalState.items.push({
+            itemId: itemDetails.id, name: itemDetails.name,
+            code: itemDetails.code || miscItemDefaults.code, qty: issuedQty, isMisc: isMisc
+        });
+
+        renderEditingRequisitionItems();
+        document.getElementById('editReqItemName').value = '';
+        document.getElementById('editReqIssuedQty').value = 0;
+        document.getElementById('editReqItemDetails').style.display = 'none';
+        document.getElementById('editReqNewStockResult').innerText = '';
+    }
+
+    function viewChallan(id) {
+        const challan = challans.find(c => c.id === id);
+        if (!challan) return;
+        let itemsHtml = challan.items.map(item => `<tr><td>${item.name}</td><td>${item.code}</td><td>${item.qty}</td></tr>`).join('');
+        document.getElementById('viewChallanModalBody').innerHTML = `
+             <div class="form-grid">
+                <div class="form-group"><label>Challan Number</label><p><strong>${challan.number}</strong></p></div>
+                <div class="form-group"><label>Challan Date</label><p><strong>${formatDateToDDMMYYYY(challan.date)}</strong></p></div>
+                <div class="form-group"><label>Vendor</label><p><strong>${challan.vendor}</strong></p></div>
+            </div><hr><h4>Challan Items</h4>
+            <div class="modal-table-container"><table class="data-table"><thead><tr><th>Item Name</th><th>Code</th><th>Supplied Qty</th></tr></thead><tbody>${itemsHtml}</tbody></table></div>
+        `;
+        openModal('viewChallanModal');
+    }
+
+    function editChallan(id) {
+        const challan = challans.find(c => c.id === id);
+        if (!challan) return;
+        editingChallanOriginalState = JSON.parse(JSON.stringify(challan));
+        
+        document.getElementById('editChallanModalBody').innerHTML = `
+            <form id="editChallanForm" class="form-grid">
+                <input type="hidden" id="editingChallanId" value="${challan.id}">
+                <div class="form-group"><label>Challan Number</label><input type="text" id="editingChallanNumber" value="${challan.number}" required></div>
+                <div class="form-group"><label>Challan Date</label><input type="date" id="editingChallanDate" value="${challan.date}" required></div>
+                <div class="form-group"><label>Vendor</label><select id="editingChallanVendor"></select></div>
+            </form><hr><h4>Edit Existing Items</h4>
+            <div class="modal-table-container"><table class="data-table"><thead><tr><th>Item Name</th><th>Supplied Qty</th><th>Action</th></tr></thead><tbody id="editingChallanItemsTableBody"></tbody></table></div><hr>
+            <h4>Add New Item to Challan</h4>
+            <div class="d-flex gap-10"><input type="checkbox" id="editChallanMiscCheckbox" onchange="toggleMiscItem('Challan', true, 'Challan')"><label for="editChallanMiscCheckbox">Miscellaneous Item</label></div>
+            <div class="form-grid mt-20">
+                <div class="form-group"><label>SELECT/WRITE ITEM</label><input type="text" id="editChallanItemName" list="itemListData" onchange="showEditChallanItemDetails()"><input type="text" id="editChallanMiscItemName" class="hidden mt-20" placeholder="Enter Miscellaneous Item Name" oninput="showEditChallanItemDetails()"></div>
+                <div class="form-group"><label>SUPPLIED QTY</label><input type="number" id="editChallanSuppliedQty" value="0" oninput="calculateEditChallanNewStock()"><span id="editChallanNewStockResult" class="calculated-value"></span></div>
+            </div>
+            <div id="editChallanItemDetails" class="item-details-box" style="display:none;"></div>
+            <button type="button" class="btn btn-secondary mt-20" onclick="addItemToChallanInEdit()">ADD ITEM</button><hr>
+            <div class="mt-20"><button class="btn btn-primary" onclick="updateChallan()">UPDATE CHALLAN</button><button class="btn btn-clear" onclick="closeModal('editChallanModal')">CANCEL</button></div>
+        `;
+
+        const vendorDropdown = document.getElementById('editingChallanVendor');
+        populateDropdown(vendorDropdown, vendors, true);
+        vendorDropdown.value = challan.vendor;
+        toggleMiscItem('Challan', true, 'Challan'); // Initialize
+
+        renderEditingChallanItems();
+        openModal('editChallanModal');
+    }
+
+    function renderEditingChallanItems() {
+        const tableBody = document.getElementById('editingChallanItemsTableBody');
+        tableBody.innerHTML = '';
+        editingChallanOriginalState.items.forEach((item, index) => {
+             tableBody.innerHTML += `<tr data-index="${index}" data-name="${item.name}"><td>${item.name}</td><td><input type="number" class="editing-challan-qty" value="${item.qty}" style="padding: 5px; width: 80px;"></td><td><button class="btn-link btn-danger" onclick="removeEditingChallanItem('${item.name}')">Remove</button></td></tr>`;
+        });
+    }
+    
+    function removeEditingChallanItem(itemName) {
+        editingChallanOriginalState.items = editingChallanOriginalState.items.filter(i => i.name !== itemName);
+        renderEditingChallanItems();
+    }
+
+    function updateChallan() {
+        const challanId = parseInt(document.getElementById('editingChallanId').value);
+        const challanInDbIndex = challans.findIndex(c => c.id === challanId);
+        if (challanInDbIndex === -1) return;
+
+        const originalChallan = JSON.parse(localStorage.getItem('inventoryAppData')).challans.find(c => c.id === challanId);
+        const updatedItemsFromModal = editingChallanOriginalState.items.map(item => {
+            const row = document.querySelector(`#editingChallanItemsTableBody tr[data-name="${item.name}"]`);
+            return row ? { ...item, qty: parseInt(row.querySelector('.editing-challan-qty').value) || 0 } : item;
+        });
+
+        const originalQtyMap = new Map(originalChallan.items.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const updatedQtyMap = new Map(updatedItemsFromModal.map(item => [(item.isMisc ? `misc-${item.name}` : `store-${item.itemId}`), item.qty]));
+        const allItemKeys = new Set([...originalQtyMap.keys(), ...updatedQtyMap.keys()]);
+
+        allItemKeys.forEach(key => {
+            const difference = (updatedQtyMap.get(key) || 0) - (originalQtyMap.get(key) || 0);
+            if (difference === 0) return;
+            const isMisc = key.startsWith('misc-');
+            if (isMisc) {
+                updateMiscItemStock(key.replace('misc-', ''), difference);
+            } else {
+                const itemInStock = items.find(i => i.id === parseInt(key.replace('store-', '')));
+                if (itemInStock) itemInStock.stock += difference;
+            }
+        });
+
+        const challanToUpdate = challans[challanInDbIndex];
+        challanToUpdate.number = document.getElementById('editingChallanNumber').value;
+        challanToUpdate.date = document.getElementById('editingChallanDate').value;
+        challanToUpdate.vendor = document.getElementById('editingChallanVendor').value;
+        challanToUpdate.items = updatedItemsFromModal;
+
+        saveData();
+        alert('Challan updated and stock adjusted.');
+        closeModal('editChallanModal');
+        renderAll();
+    }
+
+    function showEditChallanItemDetails() {
+        const isMisc = document.getElementById('editChallanMiscCheckbox').checked;
+        const itemName = isMisc ? document.getElementById('editChallanMiscItemName').value : document.getElementById('editChallanItemName').value;
+        const detailsBox = document.getElementById('editChallanItemDetails');
+        if (!itemName) { detailsBox.style.display = 'none'; return; }
+        
+        if (isMisc) {
+            const miscItem = miscItems.find(mi => mi.name.toLowerCase() === itemName.toLowerCase());
+            detailsBox.innerHTML = `
+                <div><span class="label-normal-blue">ITEM CODE:</span> ${miscItemDefaults.code}</div>
+                <div><span class="label-red">STOCK PAGE NO:</span> ${miscItemDefaults.stockPage}</div>
+                <div><span class="label-violet">PURCH. PAGE NO:</span> ${miscItemDefaults.purchPage}</div>
+                <div><span class="label-green">CURRENT STOCK:</span> <span id="editChallanCurrentStockValue">${miscItem ? miscItem.stock : 0}</span></div>
+            `;
+        } else {
+            const item = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+            if (item) {
+                 detailsBox.innerHTML = `
+                    <div><span class="label-normal-blue">ITEM CODE:</span> ${item.code}</div>
+                    <div><span class="label-red">STOCK PAGE NO:</span> ${item.stockPage}</div>
+                    <div><span class="label-violet">PURCH. PAGE NO:</span> ${item.purchPage}</div>
+                    <div><span class="label-green">CURRENT STOCK:</span> <span id="editChallanCurrentStockValue">${item.stock}</span></div>
+                `;
+            } else { detailsBox.style.display = 'none'; return; }
+        }
+        detailsBox.style.display = 'grid';
+        calculateEditChallanNewStock();
+    }
+
+    function calculateEditChallanNewStock() {
+        const currentStockEl = document.getElementById('editChallanCurrentStockValue');
+        if (!currentStockEl) return;
+        const suppliedQty = parseInt(document.getElementById('editChallanSuppliedQty').value) || 0;
+        document.getElementById('editChallanNewStockResult').innerText = `New Stock: ${parseInt(currentStockEl.innerText) + suppliedQty}`;
+    }
+
+    function addItemToChallanInEdit() {
+        const isMisc = document.getElementById('editChallanMiscCheckbox').checked;
+        const itemName = (isMisc ? document.getElementById('editChallanMiscItemName').value : document.getElementById('editChallanItemName').value).trim();
+        const suppliedQty = parseInt(document.getElementById('editChallanSuppliedQty').value);
+        
+        if (!itemName || suppliedQty <= 0) { alert('Please enter item and valid quantity.'); return; }
+        if (editingChallanOriginalState.items.some(i => i.name === itemName)) { alert('Item already in challan.'); return; }
+
+        const itemDetails = items.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+        const item = itemDetails ? {...itemDetails} : { id: null, name: itemName, code: miscItemDefaults.code };
+
+        editingChallanOriginalState.items.push({
+            itemId: item.id, name: item.name, code: item.code, qty: suppliedQty, isMisc: !itemDetails
+        });
+
+        renderEditingChallanItems();
+        document.getElementById('editChallanItemName').value = '';
+        document.getElementById('editChallanMiscItemName').value = '';
+        document.getElementById('editChallanSuppliedQty').value = 0;
+        document.getElementById('editChallanItemDetails').style.display = 'none';
+        document.getElementById('editChallanNewStockResult').innerText = '';
+    }
+
+    // --- REPORT GENERATION ---
+    function getFormattedDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    function formatDateToDDMMYYYY(dateString) {
+        if (!dateString || !dateString.includes('-')) return dateString;
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+    }
+    
+    function getLastPurchasePrice(itemId, beforeDate) {
+        let lastPrice = 0;
+        const sortedInvoices = [...invoices].sort((a, b) => new Date(b.date) - new Date(a.date));
+        for (const invoice of sortedInvoices) {
+            if (invoice.date <= beforeDate) {
+                const foundItem = invoice.items.find(i => i.itemId === itemId && !i.isMisc);
+                if (foundItem) { lastPrice = foundItem.rate * (1 + foundItem.gst / 100); return lastPrice; }
+            }
+        }
+        return lastPrice;
+    }
+    
+    function getLastMiscPurchasePrice(itemName, beforeDate) {
+        let lastPrice = 0;
+        const sortedInvoices = [...invoices].sort((a, b) => new Date(b.date) - new Date(a.date));
+        for (const invoice of sortedInvoices) {
+             if (invoice.date <= beforeDate) {
+                const foundItem = invoice.items.find(i => i.name === itemName && i.isMisc);
+                if (foundItem) { lastPrice = foundItem.rate * (1 + foundItem.gst / 100); return lastPrice; }
+             }
+        }
+        return lastPrice;
+    }
+    
+    function generateReport(title, headers, data, totalRow, format) {
+        const { jsPDF } = window.jspdf;
+        if (format === 'pdf') {
+            const doc = new jsPDF();
+            doc.text(title, 14, 15);
+            doc.autoTable({
+                head: [headers], body: data, startY: 20,
+                didDrawPage: (data) => {
+                    if (totalRow.length > 0) {
+                        doc.autoTable({ body: [totalRow], startY: data.cursor.y, theme: 'grid', styles: { fontStyle: 'bold' } });
+                    }
+                }
+            });
+            doc.save(`${title.replace(/ /g, '_')}_${getFormattedDate()}.pdf`);
+        } else if (format === 'excel') {
+            const excelData = [headers, ...data];
+            if (totalRow.length > 0) excelData.push(totalRow);
+            const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+            XLSX.writeFile(workbook, `${title.replace(/ /g, '_')}_${getFormattedDate()}.xlsx`);
+        }
+    }
+    
+    function generateStockReport(format) {
+        const data = items.map(item => [item.name, item.stock, item.unit]);
+        if (data.length === 0) { alert('No item data found.'); return; }
+        generateReport("Current Stock Report", ["Item Name", "Current Stock", "Unit"], data, [], format);
+    }
+    
+    function generateStorePurchaseReport(format) {
+        const startDate = document.getElementById('storePurchaseReportStartDate').value;
+        const endDate = document.getElementById('storePurchaseReportEndDate').value;
+        if (!startDate || !endDate) { alert('Please select a start and end date.'); return; }
+
+        let data = [], totalValue = 0;
+        invoices.filter(inv => inv.date >= startDate && inv.date <= endDate).forEach(inv => {
+            inv.items.forEach(item => {
+                if (!item.isMisc) {
+                    const rateWithGst = item.rate * (1 + item.gst / 100);
+                    const itemValue = item.qty * rateWithGst;
+                    data.push([formatDateToDDMMYYYY(inv.date), item.name, item.qty, rateWithGst.toFixed(2), itemValue.toFixed(2), inv.vendor]);
+                    totalValue += itemValue;
+                }
+            });
+        });
+        if (data.length === 0) { alert('No purchase data found for the selected criteria.'); return; }
+        const totalRow = ['', '', '', '', { content: 'TOTAL EXPENSE', styles: { halign: 'right' } }, totalValue.toFixed(2)];
+        generateReport(`Purchase Report (${formatDateToDDMMYYYY(startDate)} to ${formatDateToDDMMYYYY(endDate)})`,
+            ["DATE", "ITEM NAME", "QTY", "RATE (INCL. GST)", "VALUE", "VENDOR"], data, totalRow, format);
+    }
+    
+    function generateValuedIssueReport(format) {
+        const startDate = document.getElementById('valuedIssueReportStartDate').value;
+        const endDate = document.getElementById('valuedIssueReportEndDate').value;
+        if (!startDate || !endDate) { alert('Please select a start and end date.'); return; }
+
+        let data = [], grandTotalValue = 0;
+        let requisitionsByDept = {};
+        requisitions.filter(req => req.date >= startDate && req.date <= endDate).forEach(req => {
+            if (!requisitionsByDept[req.department]) requisitionsByDept[req.department] = [];
+            requisitionsByDept[req.department].push(req);
+        });
+        
+        Object.keys(requisitionsByDept).sort().forEach(deptName => {
+            let deptTotal = 0;
+            const reqDataForDept = [];
+            requisitionsByDept[deptName].forEach(req => {
+                let reqTotalValue = req.items.reduce((sum, item) => {
+                    return sum + (item.qty * (item.isMisc ? getLastMiscPurchasePrice(item.name, req.date) : getLastPurchasePrice(item.itemId, req.date)));
+                }, 0);
+                deptTotal += reqTotalValue;
+                reqDataForDept.push([formatDateToDDMMYYYY(req.date), req.slipNo, reqTotalValue.toFixed(2), '', '']);
+                req.items.forEach(item => { reqDataForDept.push(['', '', '', item.name, item.qty]); });
+            });
+            data.push([{ content: `DEPT: ${deptName}`, colSpan: 3, styles: { fontStyle: 'bold', fillColor: '#d3d3d3' } }, { content: `TOTAL: ${deptTotal.toFixed(2)}`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: '#d3d3d3', halign: 'right' } }]);
+            data.push(...reqDataForDept);
+            grandTotalValue += deptTotal;
+        });
+
+        if (data.length === 0) { alert('No issue data found.'); return; }
+        const totalRow = ['', '', { content: 'GRAND TOTAL', styles: { halign: 'right' } }, grandTotalValue.toFixed(2), ''];
+        generateReport(`Issued Requisition Report (${formatDateToDDMMYYYY(startDate)} to ${formatDateToDDMMYYYY(endDate)})`,
+            ["DATE", "REQ. SLIP NO.", "REQ. TOTAL VALUE", "ITEM NAME", "ISSUED QTY"], data, totalRow, format);
+    }
+    
+    function generateMiscPurchaseReport(format) {
+        const startDate = document.getElementById('miscReportStartDate').value;
+        const endDate = document.getElementById('miscReportEndDate').value;
+        if (!startDate || !endDate) { alert('Please select a start and end date.'); return; }
+
+        let data = [], totalValue = 0;
+        invoices.filter(inv => inv.date >= startDate && inv.date <= endDate).forEach(inv => {
+            inv.items.forEach(item => {
+                if (item.isMisc) {
+                    const itemValue = item.qty * item.rate * (1 + item.gst / 100);
+                    data.push([formatDateToDDMMYYYY(inv.date), item.name, item.qty, item.rate.toFixed(2), itemValue.toFixed(2), inv.vendor, inv.totalAmount.toFixed(2)]);
+                    totalValue += itemValue;
+                }
+            });
+        });
+        if (data.length === 0) { alert('No miscellaneous purchase data found.'); return; }
+        const totalRow = ['', '', '', '', { content: 'TOTAL', styles: { halign: 'right' } }, totalValue.toFixed(2), ''];
+        generateReport(`Misc Purchase Report (${formatDateToDDMMYYYY(startDate)} to ${formatDateToDDMMYYYY(endDate)})`,
+            ["Date", "Item Name", "Qty", "Rate (excl. GST)", "Value (incl. GST)", "Vendor", "Bill Amt"], data, totalRow, format);
+    }
+    
+    function generateMiscIssuedReport(format) {
+        const startDate = document.getElementById('miscReportStartDate').value;
+        const endDate = document.getElementById('miscReportEndDate').value;
+        if (!startDate || !endDate) { alert('Please select a start and end date.'); return; }
+
+        let data = [], grandTotalValue = 0, requisitionsByDept = {};
+        requisitions.filter(req => req.date >= startDate && req.date <= endDate).forEach(req => {
+            req.items.forEach(item => {
+                if (item.isMisc) {
+                    const itemValue = item.qty * getLastMiscPurchasePrice(item.name, req.date);
+                    if (!requisitionsByDept[req.department]) requisitionsByDept[req.department] = { items: [], total: 0 };
+                    requisitionsByDept[req.department].items.push([formatDateToDDMMYYYY(req.date), item.name, item.qty, itemValue.toFixed(2), formatDateToDDMMYYYY(req.date), req.slipNo]);
+                    requisitionsByDept[req.department].total += itemValue;
+                    grandTotalValue += itemValue;
+                }
+            });
+        });
+        
+        Object.keys(requisitionsByDept).sort().forEach(deptName => {
+            data.push([{ content: `DEPT: ${deptName}`, colSpan: 6, styles: { fontStyle: 'bold', fillColor: '#d3d3d3' } }]);
+            data.push(...requisitionsByDept[deptName].items);
+            data.push(['', '', { content: 'Total:', styles: { halign: 'right' } }, { content: requisitionsByDept[deptName].total.toFixed(2), styles: { fontStyle: 'bold' } }, '', '']);
+        });
+
+        if (data.length === 0) { alert('No miscellaneous issue data found.'); return; }
+        const totalRow = ['', '', { content: 'Grand Total:', styles: { halign: 'right' } }, { content: grandTotalValue.toFixed(2), styles: { fontStyle: 'bold' } }, '', ''];
+        generateReport(`Misc Issued Report (${formatDateToDDMMYYYY(startDate)} to ${formatDateToDDMMYYYY(endDate)})`,
+            ["Date", "Item Name", "Qty", "Value Consumed", "Req. Date", "Req. No."], data, totalRow, format);
+    }
+    
+    function generateItemLedgerReport(format) {
+        const itemId = parseInt(document.getElementById('ledgerItemSelect').value);
+        const startDate = document.getElementById('ledgerReportStartDate').value;
+        const endDate = document.getElementById('ledgerReportEndDate').value;
+
+        if (!itemId || !startDate || !endDate) { alert('Please select an item and a date range.'); return; }
+        const item = items.find(i => i.id === itemId);
+        if (!item) { alert('Item not found.'); return; }
+        
+        let openingStock = item.stock;
+        const today = new Date().toISOString().split('T')[0];
+        const txs = [...invoices, ...challans, ...requisitions];
+        txs.filter(tx => tx.date >= startDate && tx.date <= today).forEach(tx => {
+            tx.items.forEach(txItem => {
+                if (txItem.itemId === itemId && !txItem.isMisc) {
+                    if (tx.vendor) openingStock -= txItem.qty; // Purchase/Challan
+                    if (tx.department) openingStock += txItem.qty; // Issue
+                }
+            });
+        });
+
+        let transactions = [];
+        txs.filter(tx => tx.date >= startDate && tx.date <= endDate).forEach(tx => {
+             tx.items.forEach(txItem => {
+                if (txItem.itemId === itemId && !txItem.isMisc) {
+                    if (tx.vendor) transactions.push({ date: tx.date, type: tx.number ? 'Purchase' : 'Supplied', details: `${tx.number ? 'Inv#' : 'Challan#'}: ${tx.number || tx.number} (${tx.vendor})`, qtyIn: txItem.qty, qtyOut: 0 });
+                    if (tx.department) transactions.push({ date: tx.date, type: 'Issued', details: `Req#: ${tx.slipNo} (${tx.department})`, qtyIn: 0, qtyOut: txItem.qty });
+                }
+            });
+        });
+
+        transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+        let data = [], balance = openingStock;
+        data.push([ { content: formatDateToDDMMYYYY(startDate), styles: { fontStyle: 'bold' } }, { content: 'Opening Stock', colSpan: 4, styles: { fontStyle: 'bold' } }, { content: openingStock, styles: { fontStyle: 'bold' } }]);
+        transactions.forEach(t => {
+            balance += t.qtyIn - t.qtyOut;
+            data.push([formatDateToDDMMYYYY(t.date), t.type, t.details, t.qtyIn||'', t.qtyOut||'', balance]);
+        });
+        
+        generateReport(`Item Ledger for ${item.name}`, ["Date", "Type", "Details", "Qty In", "Qty Out", "Balance"], data, [], format);
+    }
+
+
+    // --- GENERIC MODAL MANAGEMENT ---
+    function createGenericListRenderer(list, listElementId, deleteFunction) {
+        const listElement = document.getElementById(listElementId);
+        if (!listElement) return;
+        listElement.innerHTML = '';
+        if (list.length === 0) { listElement.innerHTML = '<p>No items found.</p>'; return; }
+        
+        let sortedList = [...list];
+        if (typeof list[0] === 'object' && list[0].name) {
+            sortedList.sort((a,b) => a.name.localeCompare(b.name));
+        }
+
+        sortedList.forEach((item, index) => {
+            const name = typeof item === 'object' ? item.name : item;
+            const id = typeof item === 'object' ? item.id : (typeof item === 'number' ? item : index);
+            const displayName = listElementId === 'gstList' ? `${name}%` : name;
+            listElement.innerHTML += `<div class="modal-list-item"><span>${displayName}</span><button class="btn-link btn-danger" onclick="${deleteFunction.name}(${id})">Delete</button></div>`;
+        });
+    }
+
+    function addToList(list, name, idGenerator, key = 'name') {
+        const value = (key === 'name') ? document.getElementById(name).value.trim() : parseFloat(document.getElementById(name).value);
+        const exists = (key === 'name') ? list.some(item => item[key] === value) : list.includes(value);
+
+        if (value && !exists) {
+            if (key === 'name') {
+                list.push({ id: idGenerator ? getNextId(idGenerator) : undefined, [key]: value });
+            } else {
+                list.push(value);
+                list.sort((a, b) => a - b);
+            }
+            saveData(); renderAll();
+            document.getElementById(name).value = '';
+        }
+    }
+
+    function deleteFromList(list, id, key = 'id') {
+        if(key === 'id') list = list.filter(item => item.id !== id);
+        else list = list.filter(item => item !== id);
+        saveData(); renderAll();
+        return list;
+    }
+    
+    function renderMeasureList() { createGenericListRenderer(measures, 'measureList', deleteMeasure); }
+    function addMeasure() { addToList(measures, 'newMeasureName'); }
+    function deleteMeasure(index) { measures.splice(index, 1); saveData(); renderAll(); }
+
+    function renderVendorList() { createGenericListRenderer(vendors, 'vendorList', deleteVendor); }
+    function addVendor() { addToList(vendors, 'newVendorName', 'vendor'); }
+    function deleteVendor(id) { vendors = deleteFromList(vendors, id); }
+
+    function renderDepartmentList() { createGenericListRenderer(departments, 'departmentList', deleteDepartment); }
+    function addDepartment() { addToList(departments, 'newDepartmentName', 'department'); }
+    function deleteDepartment(id) { departments = deleteFromList(departments, id); }
+
+    function renderGstList() { createGenericListRenderer(gsts, 'gstList', deleteGst); }
+    function addGst() { addToList(gsts, 'newGstValue'); }
+    function deleteGst(value) { gsts = deleteFromList(gsts, value, 'value'); }
+
+</script>
+</body>
+</html>
